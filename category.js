@@ -45,6 +45,7 @@ function articleVisual(article) {
   return `
     <div class="article-placeholder" aria-hidden="true">
       <span>${article.tag}</span>
+      <small>${article.large ? "Featured" : "Planned"}</small>
     </div>
   `;
 }
@@ -54,9 +55,13 @@ function renderCategoryPage() {
   categoryTitle.textContent = category.title;
   categoryIntro.textContent = categoryIntros[pageCategory];
   categoryGrid.innerHTML = category.articles
-    .map(
-      (article) => `
-        <a class="article-card ${article.large ? "large" : ""}" href="${prefixUrl(article.url)}">
+    .map((article) => {
+      const hasUrl = article.url && article.url !== "#";
+      const tagName = hasUrl ? "a" : "article";
+      const href = hasUrl ? ` href="${prefixUrl(article.url)}"` : "";
+
+      return `
+        <${tagName} class="article-card ${article.large ? "large" : ""} ${hasUrl ? "" : "is-planned"}"${href}>
           ${articleVisual(article)}
           <div class="article-meta">
             <span class="tag">${article.tag}</span>
@@ -66,9 +71,9 @@ function renderCategoryPage() {
             <h3>${article.title}</h3>
             <p>${article.summary}</p>
           </div>
-        </a>
-      `,
-    )
+        </${tagName}>
+      `;
+    })
     .join("");
 }
 

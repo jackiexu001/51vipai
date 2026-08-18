@@ -13,7 +13,7 @@
   <body>
     <header class="site-header">
       <div class="top-strip">
-          <p>研究库建设中 · 聚焦美股与 AI</p>
+        <p>51VIPAI Research OS · 美股与 AI 研究库正在搭建</p>
         <div class="social-links" id="top-social-links" aria-label="社交媒体链接"></div>
       </div>
 
@@ -35,44 +35,68 @@
       </nav>
     </header>
 
-    <main>
-      <section class="hero">
+    <main class="page-shell">
+      <section class="hero panel">
         <div class="hero-copy">
           <p class="eyebrow">公开研究库 · 美股 × AI</p>
-          <h1>把美股与 AI 的长期观察，整理成可检索、可追踪、可复用的个人知识地图。</h1>
+          <h1>把美股与 AI 的长期观察，整理成个人研究地图。</h1>
           <p>
-            先从文章、清单和工具入口开始，逐步沉淀成公司索引、概念索引、专题路线和研究框架。
+            这里不是新闻流，而是持续沉淀的研究系统：从文章、清单、公司观察和工具入口开始，逐步形成可检索的知识地图。
           </p>
           <form class="hero-search" action="#" role="search">
             <input type="search" placeholder="搜索 公司 / 概念 / 工具 / 文章..." aria-label="搜索内容" />
             <button type="submit">搜索</button>
           </form>
         </div>
-        <div class="hero-panel" aria-label="网站结构概览">
-          <span>研究库状态</span>
-          <strong>持续建设中</strong>
-          <p>先公开骨架，再持续填充真实研究内容。</p>
-          <div class="metric-grid">
-            <div><b>2</b><span>核心栏目</span></div>
-            <div><b>8</b><span>内容入口</span></div>
-            <div><b>2</b><span>专题方向</span></div>
+        <div class="hero-panel" aria-label="研究库状态">
+          <div class="panel-heading">
+            <span>Coverage</span>
+            <b>研究覆盖</b>
+          </div>
+          <div class="coverage-list">
+            <div>
+              <span>美股研究</span>
+              <strong>指数 / 公司 / 财报 / ETF</strong>
+            </div>
+            <div>
+              <span>AI 研究</span>
+              <strong>工具 / Agent / 产业链 / 公司</strong>
+            </div>
+            <div>
+              <span>下一步</span>
+              <strong>专题索引 / 搜索 / Watchlist</strong>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="map-strip" aria-label="研究方向">
-        <a href="categories/us-stocks.html">
-          <span>壹 · 美股研究</span>
-          <strong>指数、公司、财报、ETF、宏观事件</strong>
+      <section class="research-grid" aria-label="研究地图">
+        <a class="research-card us-card" href="categories/us-stocks.html">
+          <span class="card-label">US Stocks</span>
+          <h2>美股研究</h2>
+          <p>建立从指数、行业、公司、财报到估值的观察框架。</p>
+          <div class="topic-row">
+            <span>指数</span><span>财报</span><span>ETF</span><span>公司</span>
+          </div>
         </a>
-        <a href="categories/ai.html">
-          <span>贰 · AI 研究</span>
-          <strong>工具、模型、Agent、产业链、核心公司</strong>
+        <a class="research-card ai-card" href="categories/ai.html">
+          <span class="card-label">Artificial Intelligence</span>
+          <h2>AI 研究</h2>
+          <p>整理工具、模型、Agent、产业链和核心公司的变化。</p>
+          <div class="topic-row">
+            <span>工具</span><span>模型</span><span>Agent</span><span>产业链</span>
+          </div>
         </a>
-        <a href="#">
-          <span>叁 · 建设中</span>
-          <strong>公司索引、概念索引、专题地图</strong>
-        </a>
+        <div class="research-card system-card">
+          <span class="card-label">Roadmap</span>
+          <h2>系统建设</h2>
+          <p>后续加入搜索、标签、公司索引、专题地图和真实研究笔记。</p>
+          <div class="status-list">
+            <span>已上线 MVP</span>
+            <span>正在优化 UI</span>
+            <span>下一步填充真实内容</span>
+          </div>
+        </div>
       </section>
 
       <section class="ticker-bar" id="quick-links" aria-label="快捷入口">
@@ -83,7 +107,7 @@
         <div class="main-column">
           <div class="section-heading">
             <div>
-              <p class="eyebrow">Latest</p>
+              <p class="eyebrow">Content</p>
               <h2 id="category-title">美股</h2>
             </div>
             <a href="categories/us-stocks.html" class="text-link" id="category-all-link">查看全部</a>
@@ -94,8 +118,9 @@
 
         <aside class="sidebar" aria-label="侧边栏">
           <div class="sidebar-card highlight">
+            <p class="eyebrow">Subscribe</p>
             <h2>关注更新</h2>
-            <p>目前先保留 X 和 YouTube，其他社交入口后续需要时再加。</p>
+            <p>先保留 X 和 YouTube 两个入口，后续根据内容节奏再扩展。</p>
             <a class="primary-link" href="#">前往 X / Twitter</a>
           </div>
 
@@ -105,6 +130,7 @@
           </div>
 
           <div class="sidebar-card">
+            <p class="eyebrow">Build</p>
             <h2>下一步计划</h2>
             <ol class="progress-list">
               <li>替换真实社交链接</li>
@@ -115,12 +141,13 @@
           </div>
 
           <div class="sidebar-card index-card">
+            <p class="eyebrow">Index</p>
             <h2>索引雏形</h2>
             <div class="index-list">
-              <a href="#"><span>公司</span><b>待整理</b></a>
-              <a href="#"><span>概念</span><b>待整理</b></a>
-              <a href="#"><span>工具</span><b>待整理</b></a>
-              <a href="#"><span>事件</span><b>待整理</b></a>
+              <a href="#"><span>公司</span><b>NVIDIA / Microsoft / Google</b></a>
+              <a href="#"><span>概念</span><b>AI Agent / ETF / 利率</b></a>
+              <a href="#"><span>工具</span><b>财报 / 数据源 / AI 应用</b></a>
+              <a href="#"><span>事件</span><b>财报季 / FOMC / 产品发布</b></a>
             </div>
           </div>
         </aside>
