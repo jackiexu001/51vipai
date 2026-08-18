@@ -8,10 +8,6 @@ const brandLink = document.querySelector("#brand-link");
 const categoryIntros = {
   "us-stocks": "整理美股新手入门、市场观察、公司研究、ETF 和财报笔记。",
   ai: "记录 AI 工具、Agent、产业链、模型应用和 AI 投资观察。",
-  crypto: "记录加密货币入门、比特币、钱包安全、交易所和链上观察。",
-  knowledge: "沉淀知识管理、阅读笔记、个人成长和方法论。",
-  tools: "收藏投资、AI、数据源、效率工具和常用网站。",
-  about: "关于 51VIPAI、联系方式、合作入口和免责声明。",
 };
 
 function prefixUrl(url) {

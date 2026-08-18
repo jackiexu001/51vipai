@@ -11,6 +11,7 @@ const categoryAllLink = document.querySelector("#category-all-link");
 
 function socialIcon(link) {
   const icons = {
+    x: `<span>X</span>`,
     youtube: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.6 7.2c-.2-.8-.8-1.4-1.6-1.6C18.6 5.2 12 5.2 12 5.2s-6.6 0-8 .4c-.8.2-1.4.8-1.6 1.6C2 8.6 2 12 2 12s0 3.4.4 4.8c.2.8.8 1.4 1.6 1.6 1.4.4 8 .4 8 .4s6.6 0 8-.4c.8-.2 1.4-.8 1.6-1.6.4-1.4.4-4.8.4-4.8s0-3.4-.4-4.8ZM10 14.8V9.2l5 2.8-5 2.8Z"/></svg>`,
     telegram: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.7 3.7 18.3 20c-.2 1-.8 1.2-1.6.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9.1-8.2c.4-.4-.1-.6-.6-.3L6 13.6l-4.8-1.5c-1-.3-1-1 .2-1.5L20.2 3.4c.9-.3 1.7.2 1.5.3Z"/></svg>`,
     email: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V7c0-1.1.9-2 2-2Zm8 8 8-5H4l8 5Zm0 2L4 10v7h16v-7l-8 5Z"/></svg>`,
