@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="site-header">
+    <header class="site-header hero">
       <div class="top-strip">
         <p>51VIPAI Research OS · 美股与 AI 研究库正在搭建</p>
         <div class="social-links" id="top-social-links" aria-label="社交媒体链接"></div>
@@ -33,64 +33,62 @@
           搜索
         </button>
       </nav>
-    </header>
 
-    <main class="page-shell">
-      <section class="hero panel">
+      <section class="hero-in">
         <div class="hero-copy">
-          <p class="eyebrow">公开研究库 · 美股 × AI</p>
-          <h1>把美股与 AI 的长期观察，整理成个人研究地图。</h1>
-          <p>
-            这里不是新闻流，而是持续沉淀的研究系统：从文章、清单、公司观察和工具入口开始，逐步形成可检索的知识地图。
+          <p class="kicker">Research memo · Public notes · <b>美股 / AI</b></p>
+          <h1>
+            美股与 AI 研究库
+            <em>51VIPAI KNOWLEDGE MAP</em>
+          </h1>
+          <p class="lede">
+            用研究报告的方式整理长期关注的问题：指数、公司、财报、AI 工具、产业链与关键事件。先从公开笔记开始，逐步沉淀成可复用的个人知识地图。
           </p>
           <form class="hero-search" action="#" role="search">
             <input type="search" placeholder="搜索 公司 / 概念 / 工具 / 文章..." aria-label="搜索内容" />
-            <button type="submit">搜索</button>
+            <button type="submit">SEARCH</button>
           </form>
-        </div>
-        <div class="hero-panel" aria-label="研究库状态">
-          <div class="panel-heading">
-            <span>Coverage</span>
-            <b>研究覆盖</b>
-          </div>
-          <div class="coverage-list">
-            <div>
-              <span>美股研究</span>
-              <strong>指数 / 公司 / 财报 / ETF</strong>
-            </div>
-            <div>
-              <span>AI 研究</span>
-              <strong>工具 / Agent / 产业链 / 公司</strong>
-            </div>
-            <div>
-              <span>下一步</span>
-              <strong>专题索引 / 搜索 / Watchlist</strong>
-            </div>
+          <div class="meta">
+            <div><b>02</b><span>核心栏目</span></div>
+            <div><b>08</b><span>内容入口</span></div>
+            <div><b>01</b><span>公开版本</span></div>
           </div>
         </div>
       </section>
+    </header>
+
+    <main class="page-shell">
 
       <section class="research-grid" aria-label="研究地图">
         <a class="research-card us-card" href="categories/us-stocks.html">
+          <span class="part-num">01</span>
+          <div>
           <span class="card-label">US Stocks</span>
-          <h2>美股研究</h2>
+          <h2>美股研究框架</h2>
           <p>建立从指数、行业、公司、财报到估值的观察框架。</p>
+          </div>
           <div class="topic-row">
             <span>指数</span><span>财报</span><span>ETF</span><span>公司</span>
           </div>
         </a>
         <a class="research-card ai-card" href="categories/ai.html">
+          <span class="part-num">02</span>
+          <div>
           <span class="card-label">Artificial Intelligence</span>
-          <h2>AI 研究</h2>
+          <h2>AI 产业与工具</h2>
           <p>整理工具、模型、Agent、产业链和核心公司的变化。</p>
+          </div>
           <div class="topic-row">
             <span>工具</span><span>模型</span><span>Agent</span><span>产业链</span>
           </div>
         </a>
         <div class="research-card system-card">
+          <span class="part-num">03</span>
+          <div>
           <span class="card-label">Roadmap</span>
-          <h2>系统建设</h2>
+          <h2>索引系统建设</h2>
           <p>后续加入搜索、标签、公司索引、专题地图和真实研究笔记。</p>
+          </div>
           <div class="status-list">
             <span>已上线 MVP</span>
             <span>正在优化 UI</span>
@@ -99,7 +97,7 @@
         </div>
       </section>
 
-      <section class="ticker-bar" id="quick-links" aria-label="快捷入口">
+      <section class="ticker-bar fig" id="quick-links" aria-label="快捷入口">
         <span>快捷入口</span>
       </section>
 
