@@ -924,3 +924,563 @@ input {
     position: static;
   }
 }
+
+/* ============ ETF 研究模块 ============ */
+
+.etf-module {
+  padding: 40px 0 72px;
+}
+
+.etf-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.etf-head h2 {
+  margin: 4px 0 6px;
+  font-family: var(--cjk);
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.etf-meta {
+  margin: 0;
+  color: var(--ink-3);
+  font-family: var(--cjk);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.etf-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--rule);
+  overflow-x: auto;
+}
+
+.etf-tab {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: var(--cjk);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.etf-tab:hover {
+  color: var(--rust);
+}
+
+.etf-tab.active {
+  color: var(--rust);
+  box-shadow: inset 0 -2px 0 var(--rust);
+}
+
+.etf-panel {
+  border: 1px solid var(--rule);
+  background: var(--card);
+}
+
+.etf-panel-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--rule-2);
+}
+
+.etf-panel-head h3 {
+  margin: 0 0 4px;
+  font-family: var(--cjk);
+  font-size: 19px;
+  line-height: 1.3;
+}
+
+.etf-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.etf-tool {
+  display: grid;
+  gap: 3px;
+}
+
+.etf-tool span {
+  color: var(--ink-3);
+  font-family: var(--cjk);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.etf-search,
+.etf-tool select {
+  min-height: 34px;
+  min-width: 160px;
+  padding: 0 10px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--cjk);
+  font-size: 12.5px;
+}
+
+.etf-search:focus,
+.etf-tool select:focus {
+  outline: 2px solid var(--rust-2);
+  outline-offset: 1px;
+}
+
+.etf-btn {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--cjk);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.etf-btn:hover {
+  border-color: var(--ink);
+}
+
+.etf-btn.ghost {
+  background: transparent;
+}
+
+.etf-table-wrap {
+  overflow-x: auto;
+}
+
+.etf-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-family: var(--cjk);
+  font-size: 12.5px;
+}
+
+.etf-table th,
+.etf-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule-2);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.etf-table th {
+  color: var(--ink-2);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.etf-table th[data-sort] {
+  cursor: pointer;
+}
+
+.etf-table th[data-sort]:hover {
+  color: var(--rust);
+}
+
+.etf-table tbody tr:hover {
+  background: var(--paper);
+}
+
+.etf-table tr.is-fav {
+  background: rgba(176, 67, 28, 0.04);
+}
+
+.etf-table .is-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.etf-fav-col,
+.etf-cmp-col {
+  width: 34px;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  text-align: center !important;
+}
+
+.etf-icon-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 6px;
+}
+
+.etf-icon-btn.on {
+  color: var(--rust);
+}
+
+.etf-cmp-col input {
+  accent-color: var(--rust);
+  cursor: pointer;
+}
+
+.etf-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.etf-badge.ok {
+  background: rgba(74, 97, 65, 0.12);
+  color: var(--moss);
+}
+
+.etf-badge.warn {
+  background: rgba(181, 138, 43, 0.14);
+  color: #8a6410;
+}
+
+.etf-badge.bad {
+  background: rgba(176, 67, 28, 0.12);
+  color: var(--rust);
+}
+
+.etf-badge.dim {
+  background: var(--paper);
+  color: var(--ink-3);
+}
+
+.etf-empty {
+  padding: 56px 20px;
+  color: var(--ink-3);
+  font-family: var(--cjk);
+  font-size: 13.5px;
+  text-align: center;
+}
+
+/* 市场概览 */
+
+.etf-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.etf-stat {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+}
+
+.etf-stat span {
+  color: var(--ink-3);
+  font-family: var(--cjk);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.etf-stat b {
+  font-family: var(--disp);
+  font-size: 27px;
+  line-height: 1.1;
+}
+
+.etf-stat small {
+  color: var(--ink-3);
+  font-family: var(--cjk);
+  font-size: 11.5px;
+}
+
+.etf-stat.high b {
+  color: var(--rust);
+}
+
+.etf-stat.greed b {
+  color: var(--gold);
+}
+
+.etf-stat.calm b {
+  color: var(--moss);
+}
+
+.etf-stat.flat b {
+  color: var(--indigo);
+}
+
+.etf-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.etf-card {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--rule);
+  background: var(--card);
+}
+
+.etf-card:hover {
+  border-color: var(--ink);
+}
+
+.etf-card-kicker {
+  color: var(--rust);
+  font-family: var(--disp);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.etf-card h4 {
+  margin: 0;
+  font-family: var(--cjk);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.etf-card p {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: var(--cjk);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.etf-card-link {
+  color: var(--ink-3);
+  font-family: var(--cjk);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.etf-card:hover .etf-card-link {
+  color: var(--rust);
+}
+
+/* 组合 */
+
+.etf-portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.etf-portfolio {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.etf-portfolio-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ink-3);
+  font-family: var(--disp);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.etf-portfolio-head em {
+  color: var(--rust);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.etf-portfolio h4 {
+  margin: 0;
+  font-family: var(--cjk);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.etf-portfolio p {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: var(--cjk);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.etf-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.etf-tags span {
+  padding: 2px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-family: var(--cjk);
+  font-size: 10.5px;
+}
+
+/* 对比托盘与弹窗 */
+
+.etf-compare-tray {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(760px, calc(100% - 32px));
+  padding: 10px 14px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(240, 234, 220, 0.22);
+  background: var(--indigo);
+  box-shadow: 0 14px 40px rgba(29, 30, 25, 0.32);
+  color: #f0eadc;
+  font-family: var(--cjk);
+  font-size: 12.5px;
+}
+
+.etf-compare-tray span {
+  flex: 0 0 auto;
+  color: var(--rust-2);
+  font-weight: 700;
+}
+
+.etf-compare-tray b {
+  flex: 1;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.etf-compare-tray .etf-btn {
+  border-color: rgba(240, 234, 220, 0.35);
+  background: var(--rust);
+  color: #fff;
+}
+
+.etf-compare-tray .etf-btn.ghost {
+  background: transparent;
+  color: #f0eadc;
+}
+
+.etf-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(29, 30, 25, 0.55);
+}
+
+.etf-modal {
+  width: min(920px, 100%);
+  max-height: 82vh;
+  overflow: auto;
+  border: 1px solid var(--rule);
+  background: var(--card);
+  box-shadow: 0 24px 64px rgba(29, 30, 25, 0.35);
+}
+
+.etf-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.etf-modal-head h3 {
+  margin: 0;
+  font-family: var(--cjk);
+  font-size: 17px;
+}
+
+.etf-modal .etf-table {
+  min-width: 560px;
+}
+
+.etf-modal .etf-table th {
+  width: 120px;
+  background: var(--paper);
+}
+
+.etf-modal .etf-meta {
+  padding: 12px 20px;
+}
+
+@media (max-width: 960px) {
+  .etf-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .etf-portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .etf-head,
+  .etf-panel-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .etf-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .etf-card-grid,
+  .etf-portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .etf-tools {
+    width: 100%;
+  }
+
+  .etf-search,
+  .etf-tool select {
+    min-width: 100%;
+  }
+
+  .etf-compare-tray {
+    flex-wrap: wrap;
+  }
+
+  .etf-compare-tray b {
+    flex-basis: 100%;
+  }
+}

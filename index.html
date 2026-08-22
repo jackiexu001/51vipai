@@ -27,6 +27,7 @@
         <div class="nav-links">
           <button class="nav-tab active" type="button" data-category="us-stocks">美股</button>
           <button class="nav-tab" type="button" data-category="ai">AI</button>
+          <button class="nav-tab" type="button" data-category="etf">ETF</button>
         </div>
 
         <button class="search-button" type="button" aria-label="搜索">
@@ -49,7 +50,7 @@
             <button type="submit">SEARCH</button>
           </form>
           <div class="meta">
-            <div><b>02</b><span>核心栏目</span></div>
+            <div><b>03</b><span>核心栏目</span></div>
             <div><b>08</b><span>内容入口</span></div>
             <div><b>01</b><span>公开版本</span></div>
           </div>
@@ -58,6 +59,7 @@
     </header>
 
     <main class="page-shell">
+      <section class="etf-module" id="etf-module" hidden aria-label="ETF 研究模块"></section>
 
       <section class="research-grid" aria-label="研究地图">
         <a class="research-card us-card" href="categories/us-stocks.html">
@@ -158,5 +160,6 @@
 
     <script src="content.js"></script>
     <script src="script.js"></script>
+    <script src="etf.js"></script>
   </body>
 </html>

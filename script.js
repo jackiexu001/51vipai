@@ -8,6 +8,9 @@ const topSocialLinks = document.querySelector("#top-social-links");
 const sidebarSocialLinks = document.querySelector("#sidebar-social-links");
 const quickLinks = document.querySelector("#quick-links");
 const categoryAllLink = document.querySelector("#category-all-link");
+const etfModule = document.querySelector("#etf-module");
+const researchGrid = document.querySelector(".research-grid");
+const contentShell = document.querySelector(".content-shell");
 
 function socialIcon(link) {
   const icons = {
@@ -104,11 +107,28 @@ tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     tabs.forEach((item) => item.classList.remove("active"));
     tab.classList.add("active");
-    renderCategory(tab.dataset.category);
+    activateTab(tab.dataset.category);
     navLinks.classList.remove("open");
     menuButton.setAttribute("aria-expanded", "false");
   });
 });
+
+function activateTab(category) {
+  if (category === "etf") {
+    researchGrid.hidden = true;
+    contentShell.hidden = true;
+    etfModule.hidden = false;
+    if (typeof renderEtfModule === "function") {
+      renderEtfModule();
+    }
+    return;
+  }
+
+  researchGrid.hidden = false;
+  contentShell.hidden = false;
+  etfModule.hidden = true;
+  renderCategory(category);
+}
 
 menuButton.addEventListener("click", () => {
   const isOpen = navLinks.classList.toggle("open");
@@ -117,4 +137,9 @@ menuButton.addEventListener("click", () => {
 
 renderBrand();
 renderSiteLinks();
-renderCategory("us-stocks");
+
+const initialTab = location.hash === "#etf" ? "etf" : "us-stocks";
+tabs.forEach((tab) => {
+  tab.classList.toggle("active", tab.dataset.category === initialTab);
+});
+activateTab(initialTab);
