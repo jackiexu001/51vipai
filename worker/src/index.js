@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 11;
+const UNIVERSE_VERSION = 12;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -794,9 +794,9 @@ function validateSnapshot(snapshot) {
 
 async function buildDashboardSnapshot() {
   const generatedAt = new Date().toISOString();
-  const [metrics, onExchange, qdii] = await Promise.all([
+  const onExchange = await buildOnExchangeFunds();
+  const [metrics, qdii] = await Promise.all([
     buildMarketMetrics(),
-    buildOnExchangeFunds(),
     buildQdiiDatasets(),
   ]);
   const snapshot = {
