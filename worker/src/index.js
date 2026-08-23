@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 3;
+const UNIVERSE_VERSION = 4;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -457,7 +457,7 @@ async function fetchTencentQuoteBatch(funds) {
 
 async function fetchTencentQuoteBatchChunked(funds) {
   const merged = new Map();
-  for (const group of chunks(funds, 20)) {
+  for (const group of chunks(funds, 8)) {
     const quotes = await fetchTencentQuoteBatch(group);
     for (const [code, quote] of quotes) merged.set(code, quote);
   }
@@ -519,7 +519,7 @@ async function fetchSinaQuoteBatch(funds) {
 
 async function fetchSinaQuoteBatchChunked(funds) {
   const merged = new Map();
-  for (const group of chunks(funds, 20)) {
+  for (const group of chunks(funds, 8)) {
     const quotes = await fetchSinaQuoteBatch(group);
     for (const [code, quote] of quotes) merged.set(code, quote);
   }
@@ -583,7 +583,7 @@ async function buildOnExchangeFunds() {
       const [quoteResult, detailResult] = await Promise.allSettled([quoteTask, detailTask]);
       const quote = quoteResult.status === "fulfilled" ? quoteResult.value : {};
       const detail = detailResult.status === "fulfilled" ? detailResult.value : {};
-      if (!quote.name && !detail.name) throw new Error(`No listed ETF data for ${fund.code}`);
+      if (!quote.name && !detail.name && !fund.name) throw new Error(`No listed ETF data for ${fund.code}`);
       const premiumPct = quote.price && detail.nav ? ((quote.price - detail.nav) / detail.nav) * 100 : null;
       return compactObject({
         code: fund.code,
