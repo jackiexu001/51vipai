@@ -7,7 +7,7 @@
     <title>ETF 与 QDII 研究 | 51VIPAI</title>
     <meta name="description" content="51VIPAI ETF 研究页：对比场内 ETF、纳指与标普场外基金、主动 QDII 的费率、规模、收益、溢价和申购状态。" />
     <link rel="canonical" href="https://www.51vipai.com/etf/" />
-    <link rel="stylesheet" href="styles.css?v=1" />
+    <link rel="stylesheet" href="styles.css?v=2" />
   </head>
   <body>
     <a class="skip-link" href="#etf-content">跳到主要内容</a>
@@ -21,6 +21,7 @@
           <a href="../categories/us-stocks.html">美股</a>
           <a href="../categories/ai.html">AI</a>
           <a class="active" href="index.html" aria-current="page">ETF</a>
+          <a href="#etf-guide">指南</a>
         </div>
         <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
       </nav>
@@ -92,6 +93,87 @@
         <article><span>02</span><h2>新鲜度可判断</h2><p>过期快照会明确标记，接口失败时保留最后一份有效缓存并展示警告。</p></article>
         <article><span>03</span><h2>指标不混用</h2><p>价格、净值、溢价和收益必须基于兼容日期与口径，避免用不同交易日误算。</p></article>
       </section>
+
+      <section class="guide-section" id="etf-guide" aria-label="纳指与标普投资指南">
+        <div class="guide-head">
+          <p class="eyebrow">ETF GUIDE</p>
+          <h2>纳斯达克 100 与标普 500：先弄清指数，再选择工具</h2>
+          <p>这一部分参考 WiseETF guide 的核心结构重新整理：用更短的路径回答“买的是什么、里面有什么、通过什么方式买、开户前要准备什么”。内容仅用于投资者教育，不构成投资建议。</p>
+        </div>
+
+        <div class="index-compare-grid">
+          <article class="index-card">
+            <span class="index-tag">NASDAQ-100 · NDX</span>
+            <h3>纳斯达克 100：更偏科技与成长</h3>
+            <p>纳指 100 由纳斯达克市场中规模较大的非金融公司组成，采用修正市值加权。它常被视为美国大型成长股、科技与创新公司的代表，弹性更强，波动通常也更明显。</p>
+            <ul>
+              <li>代表行业：信息技术、可选消费、通信服务、医疗健康。</li>
+              <li>适合画像：看好科技龙头长期增长，并能接受较高波动。</li>
+              <li>观察重点：头部权重集中度、估值分位、美元汇率与 QDII 额度。</li>
+            </ul>
+          </article>
+          <article class="index-card">
+            <span class="index-tag">S&amp;P 500 · SPX</span>
+            <h3>标普 500：更像美国大盘底仓</h3>
+            <p>标普 500 覆盖美国大型上市公司，按自由流通市值加权，行业分布比纳指更均衡。它常被用作美国权益市场的核心基准。</p>
+            <ul>
+              <li>代表行业：科技、通信服务、金融、医疗、消费、工业等。</li>
+              <li>适合画像：想配置美国经济整体 Beta，而不是只押注科技风格。</li>
+              <li>观察重点：估值水平、盈利周期、美元利率、基金跟踪误差。</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="holdings-panel">
+          <div>
+            <p class="eyebrow">CORE HOLDINGS</p>
+            <h3>核心持仓大致长什么样？</h3>
+            <p>两条指数都会重仓美国超级大盘股，只是纳指 100 对科技与成长风格更集中；标普 500 覆盖面更宽，金融、医疗、消费等板块占比更高。权重会随指数调整和股价变化而变化。</p>
+          </div>
+          <div class="holding-list">
+            <div>
+              <h4>纳斯达克 100 常见头部</h4>
+              <p>英伟达、苹果、微软、亚马逊、Alphabet、Meta、博通、特斯拉等。</p>
+            </div>
+            <div>
+              <h4>标普 500 常见头部</h4>
+              <p>英伟达、苹果、微软、亚马逊、Alphabet、博通、Meta、摩根大通、伯克希尔等。</p>
+            </div>
+          </div>
+          <p class="source-note">持仓口径参考 Nasdaq 与 S&amp;P Dow Jones Indices 公开资料；实际权重请以指数公司或具体基金最新披露为准。</p>
+        </div>
+
+        <div class="ways-grid">
+          <article>
+            <span>方式一</span>
+            <h3>A 股场内 ETF</h3>
+            <p>在国内证券账户内像股票一样买卖 ETF。优点是交易方便、盘中可成交；缺点是跨境 ETF 容易出现溢价，买入前要重点看溢价率、成交额和跟踪误差。</p>
+          </article>
+          <article>
+            <span>方式二</span>
+            <h3>场外 QDII / ETF 联接基金</h3>
+            <p>通过基金销售平台、银行或券商基金入口申购。优点是更适合定投和小额买入；缺点是净值按日确认，且可能遇到限额或暂停申购。</p>
+          </article>
+          <article>
+            <span>方式三</span>
+            <h3>海外券商直接买美股 ETF</h3>
+            <p>开通支持美股交易的账户后，可直接买入 QQQ、VOO、IVV、SPY 等产品。优点是产品丰富、费率低；缺点是需要处理换汇、税务、入金和合规要求。</p>
+          </article>
+        </div>
+
+        <div class="account-guide">
+          <div>
+            <p class="eyebrow">ACCOUNT CHECKLIST</p>
+            <h3>开户前先确认 4 件事</h3>
+          </div>
+          <ol>
+            <li><b>你要用哪条路径：</b>场内交易、场外申购，还是海外券商；路径不同，成本和限制完全不同。</li>
+            <li><b>账户权限是否齐全：</b>场内 ETF 需要证券账户；场外基金需要基金交易权限；海外 ETF 需要美股交易与入金通道。</li>
+            <li><b>费用与汇率：</b>关注管理费、托管费、交易佣金、申购赎回费、买卖价差和换汇成本。</li>
+            <li><b>风险边界：</b>确认自己能接受多大回撤；纳指波动更高，标普更分散但也不是低风险资产。</li>
+          </ol>
+        </div>
+      </section>
     </main>
 
     <aside class="compare-tray" id="compare-tray" hidden aria-live="polite">
@@ -113,7 +195,7 @@
       <a href="../index.html">返回研究库</a>
     </footer>
 
-    <script src="config.js?v=1"></script>
-    <script src="app.js?v=1"></script>
+    <script src="config.js?v=2"></script>
+    <script src="app.js?v=2"></script>
   </body>
 </html>

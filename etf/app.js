@@ -35,7 +35,19 @@
     nasdaq: commonColumns,
     sp500: commonColumns,
     active: commonColumns,
-    watchlist: commonColumns,
+    watchlist: [
+      { key: "code", label: "代码", className: "fund-code" },
+      { key: "name", label: "基金名称", className: "fund-name" },
+      { key: "dataset", label: "分类", format: "dataset" },
+      { key: "trackingIndex", label: "跟踪指数" },
+      { key: "scaleCny100m", label: "规模(亿)", format: "number", numeric: true },
+      { key: "return1yPct", label: "近1年", format: "pct", numeric: true },
+      { key: "marketChangePct", label: "场内涨跌", format: "pct", numeric: true },
+      { key: "premiumPct", label: "溢价率", format: "premium", numeric: true },
+      { key: "feeRatePct", label: "综合费率", format: "pct", numeric: true },
+      { key: "dailyLimit", label: "每日限额" },
+      { key: "purchaseStatus", label: "申购状态", format: "status" },
+    ],
   };
 
   const elements = {
@@ -206,9 +218,7 @@
   }
 
   function viewColumns() {
-    if (state.view !== "watchlist") return columnsByView[state.view];
-    const rows = currentRows();
-    return rows.some((row) => row.dataset === "onExchange") ? columnsByView.onExchange : columnsByView.watchlist;
+    return columnsByView[state.view];
   }
 
   function formatCell(value, column) {
@@ -223,6 +233,10 @@
     if (column.format === "status") {
       const labels = { open: "可申购", limited: "限额申购", suspended: "暂停申购" };
       return `<span class="badge ${escapeHtml(value)}">${labels[value] || "状态未知"}</span>`;
+    }
+    if (column.format === "dataset") {
+      const labels = { onExchange: "场内 ETF", nasdaq: "场外纳指", sp500: "场外标普", active: "美股主动" };
+      return `<span class="dataset-pill">${labels[value] || "其他"}</span>`;
     }
     return escapeHtml(value);
   }
@@ -247,6 +261,13 @@
         <td><input type="checkbox" data-compare="${escapeHtml(row.code)}" aria-label="加入基金对比" ${state.compare.has(row.code) ? "checked" : ""}></td>
         ${columns.map((column) => `<td class="${column.numeric ? "is-number " : ""}${column.className || ""}">${formatCell(row[column.key], column)}</td>`).join("")}
       </tr>`).join("");
+    if (state.view === "watchlist") {
+      elements.empty.querySelector("strong").textContent = "还没有加入自选";
+      elements.empty.querySelector("p").textContent = "点击任意基金左侧的星标即可加入；自选会保存在当前浏览器本地，方便你把场内、场外和主动 QDII 放在同一张表里观察。";
+    } else {
+      elements.empty.querySelector("strong").textContent = "暂时没有可展示的数据";
+      elements.empty.querySelector("p").textContent = "数据接口未连接或当前筛选没有结果。页面不会用演示数字代替真实行情。";
+    }
     elements.empty.hidden = rows.length > 0;
     document.querySelector(".fund-table").hidden = rows.length === 0;
     renderCompareTray();
