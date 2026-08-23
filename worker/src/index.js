@@ -6,6 +6,8 @@ const JSON_HEADERS = {
 
 const SOURCE_ID = "eastmoney-yahoo-public";
 const SOURCE_LABEL = "东方财富公开数据 + Yahoo Finance 延迟行情";
+const WISE_SOURCE_ID = "wise-etf-public";
+const WISE_SOURCE_LABEL = "WiseETF 公开接口";
 const USER_AGENT =
   "Mozilla/5.0 (compatible; 51vipai-etf/1.0; +https://www.51vipai.com/)";
 
@@ -34,7 +36,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 16;
+const UNIVERSE_VERSION = 17;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -317,6 +319,122 @@ async function buildMarketMetrics() {
     metricFromYahoo("USDCNY=X", "usdcny", "美元/人民币"),
   ]);
   return metrics.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+}
+
+function wiseStatus(value) {
+  if (value === "open") return "open";
+  if (value === "limited") return "limited";
+  if (value === "suspended") return "suspended";
+  return value || null;
+}
+
+function mapWiseFund(row, category) {
+  return compactObject({
+    code: String(row.code || ""),
+    name: row.name || "",
+    trackingIndex: row.tracking_index || (category === "nasdaq" ? "纳斯达克100" : category === "sp500" ? "标普500" : category === "active" ? "主动美股/QDII" : "纳斯达克100 / 标普500"),
+    shareClass: row.share_class ?? null,
+    masterCode: row.master_code ?? null,
+    codeC: row.code_c ?? null,
+    scaleCny100m: row.scale ?? null,
+    scaleAsOf: row.scale_as_of ?? null,
+    ytdReturnPct: row.ytd_return ?? row.return_ytd ?? null,
+    annualReturn2025Pct: row.annual_return_2025 ?? null,
+    annualReturn2025AsOf: row.annual_return_2025_as_of ?? null,
+    returnYtdPct: row.return_ytd ?? row.ytd_return ?? null,
+    return1yPct: row.rolling_1y ?? null,
+    return1yAsOf: row.rolling_1y_as_of ?? null,
+    dayChangePct: row.day_change ?? null,
+    dayChangeAsOf: row.day_change_as_of ?? null,
+    nav: row.nav ?? null,
+    navDate: row.nav_date ?? row.nav_as_of ?? null,
+    marketPrice: row.market_price ?? null,
+    marketChangePct: row.market_change_pct ?? row.change_pct ?? null,
+    quoteAsOf: row.quote_as_of ?? null,
+    quoteSource: row.quote_source ?? null,
+    premiumPct: row.premium_pct ?? row.premium ?? null,
+    premiumAsOf: row.premium_as_of ?? null,
+    premiumQuoteAsOf: row.premium_quote_as_of ?? null,
+    premiumNavAsOf: row.premium_nav_as_of ?? null,
+    premiumBasis: row.premium_basis ?? null,
+    turnoverCny100m: row.turnover_cny_100m ?? row.volume ?? null,
+    volume: row.volume ?? null,
+    trackingErrorPct: row.track_error ?? null,
+    trackingErrorAsOf: row.track_error_as_of ?? null,
+    feeRatePct: row.fee_rate ?? null,
+    dailyLimit: row.daily_limit ?? null,
+    dailyLimitCny: row.daily_limit_cny ?? null,
+    purchaseStatus: wiseStatus(row.subscription_status || row.buy_status),
+    buyStatus: row.buy_status ?? null,
+    subscriptionStatus: row.subscription_status ?? null,
+    subscriptionAsOf: row.subscription_as_of ?? null,
+    source: row.source ?? null,
+    fetchedAt: row.fetched_at ?? null,
+    dataStatus: row.data_status ?? null,
+    dailyStatus: row.daily_status ?? null,
+    quoteStatus: row.quote_status ?? null,
+    navStatus: row.nav_status ?? null,
+    premiumStatus: row.premium_status ?? null,
+    trackingErrorStatus: row.track_error_status ?? null,
+    metadataSource: row.metadata_source ?? null,
+  });
+}
+
+async function fetchWiseRows(path) {
+  const payload = await fetchJson(`https://www.wise-etf.com${path}`, {
+    headers: { accept: "application/json", referer: "https://www.wise-etf.com/etf" },
+  });
+  if (!Array.isArray(payload?.data)) throw new Error(`WiseETF response missing data: ${path}`);
+  return payload.data;
+}
+
+async function buildWiseMarketMetrics() {
+  const payload = await fetchJson("https://www.wise-etf.com/api/market-sentiment", {
+    headers: { accept: "application/json", referer: "https://www.wise-etf.com/etf" },
+  });
+  const data = payload?.data || {};
+  return [
+    { id: "sp500", label: "标普500", value: data.spx_price?.price ?? null, displayValue: data.spx_price?.price?.toLocaleString?.("zh-CN", { maximumFractionDigits: 2 }) ?? "—", changePct: data.spx_price?.change_pct ?? null, note: `近一年 ${formatPct(data.spx_price?.returns?.yr1 ?? null)} · ${data.spx_price?.as_of || "待更新"}`, asOf: data.spx_price?.as_of },
+    { id: "nasdaq100", label: "纳斯达克100", value: data.ndx_price?.price ?? null, displayValue: data.ndx_price?.price?.toLocaleString?.("zh-CN", { maximumFractionDigits: 2 }) ?? "—", changePct: data.ndx_price?.change_pct ?? null, note: `近一年 ${formatPct(data.ndx_price?.returns?.yr1 ?? null)} · ${data.ndx_price?.as_of || "待更新"}`, asOf: data.ndx_price?.as_of },
+    { id: "vix", label: "VIX", value: data.vix?.value ?? null, displayValue: data.vix?.value == null ? "—" : String(data.vix.value), changePct: data.vix?.change_pct ?? null, note: `${data.vix?.source || "CBOE"} · ${data.vix?.date || "待更新"}`, asOf: data.vix?.as_of },
+    { id: "fear_greed", label: "恐慌贪婪", value: data.fear_greed?.score ?? null, displayValue: data.fear_greed?.score == null ? "—" : String(data.fear_greed.score), changePct: null, note: `${data.fear_greed?.rating || "—"} · ${String(data.fear_greed?.as_of || "").slice(0, 10)}`, asOf: data.fear_greed?.as_of },
+    { id: "sp500_pe", label: "标普500 PE", value: data.pe?.pe ?? null, displayValue: data.pe?.pe == null ? "—" : String(data.pe.pe), changePct: null, note: `分位 ${data.pe?.percentile ?? "—"}% · ${data.pe?.as_of || "待更新"}`, asOf: data.pe?.as_of },
+  ];
+}
+
+async function buildWiseDashboardSnapshot() {
+  const generatedAt = new Date().toISOString();
+  const [nasdaq, sp500, active, etfs, metrics] = await Promise.all([
+    fetchWiseRows("/api/funds/nasdaq_passive"),
+    fetchWiseRows("/api/funds/sp500_passive"),
+    fetchWiseRows("/api/funds/us_active"),
+    fetchWiseRows("/api/etfs"),
+    buildWiseMarketMetrics(),
+  ]);
+  const snapshot = {
+    meta: {
+      source: WISE_SOURCE_LABEL,
+      asOf: generatedAt,
+      generatedAt,
+      version: 2,
+      universeVersion: UNIVERSE_VERSION,
+      sourceUrls: [
+        "https://www.wise-etf.com/api/funds/nasdaq_passive",
+        "https://www.wise-etf.com/api/funds/sp500_passive",
+        "https://www.wise-etf.com/api/funds/us_active",
+        "https://www.wise-etf.com/api/etfs",
+      ],
+    },
+    metrics,
+    datasets: {
+      onExchange: etfs.map((row) => mapWiseFund(row, "onExchange")),
+      nasdaq: nasdaq.map((row) => mapWiseFund(row, "nasdaq")),
+      sp500: sp500.map((row) => mapWiseFund(row, "sp500")),
+      active: active.map((row) => mapWiseFund(row, "active")),
+    },
+  };
+  if (!validateSnapshot(snapshot)) throw new Error("Generated WiseETF dashboard snapshot is invalid");
+  return snapshot;
 }
 
 async function metricFromYahoo(symbol, id, label) {
@@ -877,6 +995,11 @@ function validateSnapshot(snapshot) {
 }
 
 async function buildDashboardSnapshot() {
+  try {
+    return await buildWiseDashboardSnapshot();
+  } catch (error) {
+    console.error("WiseETF dashboard source failed, falling back to legacy sources", error);
+  }
   const generatedAt = new Date().toISOString();
   const onExchange = await buildOnExchangeFunds();
   const [metrics, qdii] = await Promise.all([

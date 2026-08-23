@@ -14,37 +14,50 @@
   const commonColumns = [
     { key: "code", label: "代码", className: "fund-code" },
     { key: "name", label: "基金名称", className: "fund-name" },
-    { key: "scaleCny100m", label: "规模(亿)", format: "number", numeric: true },
+    { key: "nav", label: "最新净值", format: "price", numeric: true },
+    { key: "dayChangePct", label: "净值日涨跌", format: "pct", numeric: true },
+    { key: "returnYtdPct", label: "今年以来", format: "pct", numeric: true },
     { key: "return1yPct", label: "近1年", format: "pct", numeric: true },
+    { key: "scaleCny100m", label: "规模(亿)", format: "number", numeric: true },
     { key: "feeRatePct", label: "综合费率", format: "pct", numeric: true },
+    { key: "trackingErrorPct", label: "跟踪误差", format: "pct", numeric: true },
     { key: "dailyLimit", label: "每日限额" },
     { key: "purchaseStatus", label: "申购状态", format: "status" },
+    { key: "navDate", label: "净值日期", format: "date" },
   ];
+  const activeColumns = commonColumns.filter((column) => column.key !== "trackingErrorPct");
   const columnsByView = {
     onExchange: [
       { key: "code", label: "代码", className: "fund-code" },
       { key: "name", label: "ETF 名称", className: "fund-name" },
       { key: "trackingIndex", label: "跟踪指数" },
-      { key: "scaleCny100m", label: "规模(亿)", format: "number", numeric: true },
-      { key: "return1yPct", label: "近1年", format: "pct", numeric: true },
+      { key: "marketPrice", label: "场内价格", format: "price", numeric: true },
+      { key: "nav", label: "最新净值", format: "price", numeric: true },
       { key: "marketChangePct", label: "场内涨跌", format: "pct", numeric: true },
       { key: "premiumPct", label: "溢价率", format: "premium", numeric: true },
+      { key: "return1yPct", label: "近1年", format: "pct", numeric: true },
+      { key: "scaleCny100m", label: "规模(亿)", format: "number", numeric: true },
       { key: "turnoverCny100m", label: "成交额(亿)", format: "number", numeric: true },
-      { key: "trackingErrorPct", label: "跟踪误差", format: "pct", numeric: true },
       { key: "feeRatePct", label: "综合费率", format: "pct", numeric: true },
+      { key: "trackingErrorPct", label: "跟踪误差", format: "pct", numeric: true },
+      { key: "quoteAsOf", label: "报价时间", format: "shortDateTime" },
+      { key: "navDate", label: "净值日期", format: "date" },
     ],
     nasdaq: commonColumns,
     sp500: commonColumns,
-    active: commonColumns,
+    active: activeColumns,
     watchlist: [
       { key: "code", label: "代码", className: "fund-code" },
       { key: "name", label: "基金名称", className: "fund-name" },
       { key: "dataset", label: "分类", format: "dataset" },
       { key: "trackingIndex", label: "跟踪指数" },
+      { key: "nav", label: "净值/价格", format: "price", numeric: true },
       { key: "scaleCny100m", label: "规模(亿)", format: "number", numeric: true },
+      { key: "returnYtdPct", label: "今年以来", format: "pct", numeric: true },
       { key: "return1yPct", label: "近1年", format: "pct", numeric: true },
       { key: "marketChangePct", label: "场内涨跌", format: "pct", numeric: true },
       { key: "premiumPct", label: "溢价率", format: "premium", numeric: true },
+      { key: "trackingErrorPct", label: "跟踪误差", format: "pct", numeric: true },
       { key: "feeRatePct", label: "综合费率", format: "pct", numeric: true },
       { key: "dailyLimit", label: "每日限额" },
       { key: "purchaseStatus", label: "申购状态", format: "status" },
@@ -246,6 +259,9 @@
   function formatCell(value, column) {
     if (value == null || value === "") return "—";
     if (column.format === "number") return new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(value);
+    if (column.format === "price") return new Intl.NumberFormat("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(value);
+    if (column.format === "date") return escapeHtml(value);
+    if (column.format === "shortDateTime") return escapeHtml(String(value).slice(0, 16).replace("T", " "));
     if (column.format === "pct" || column.format === "premium") {
       const number = Number(value);
       const text = `${number > 0 ? "+" : ""}${number.toFixed(2)}%`;
