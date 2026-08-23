@@ -184,10 +184,96 @@ async function fetchEastmoneyQuote(fund) {
   };
 }
 
+async function fetchEastmoneyQuoteBatch(funds) {
+  const fields = "f12,f14,f2,f3,f6";
+  const secids = funds.map((fund) => `${fund.market}.${fund.code}`).join(",");
+  const data = await fetchJson(
+    `https://push2.eastmoney.com/api/qt/ulist.np/get?secids=${secids}&fields=${fields}`,
+    { headers: { referer: "https://quote.eastmoney.com/" } },
+  );
+  const rows = data?.data?.diff;
+  if (!Array.isArray(rows)) throw new Error("Eastmoney quote batch missing data");
+  return new Map(rows.map((row) => [
+    String(row.f12),
+    {
+      code: String(row.f12),
+      name: row.f14,
+      price: toNumber(row.f2) === null ? null : toNumber(row.f2) / 1000,
+      marketChangePct: toNumber(row.f3) === null ? null : toNumber(row.f3) / 100,
+      turnoverCny100m: toNumber(row.f6) === null ? null : toNumber(row.f6) / 100000000,
+      quoteSource: "Eastmoney batch",
+    },
+  ]));
+}
+
+function exchangePrefix(fund) {
+  return fund.market === 1 ? "sh" : "sz";
+}
+
+async function fetchTencentQuote(fund) {
+  const prefix = exchangePrefix(fund);
+  const text = await fetchText(`https://qt.gtimg.cn/q=s_${prefix}${fund.code}`, {
+    headers: { referer: "https://gu.qq.com/" },
+  });
+  const match = text.match(/="([^"]*)"/);
+  const fields = match?.[1]?.split("~") || [];
+  if (fields.length < 8 || fields[2] !== fund.code) throw new Error(`Tencent quote missing data for ${fund.code}`);
+  return {
+    code: fields[2],
+    name: fields[1],
+    price: toNumber(fields[3]),
+    marketChangePct: toNumber(fields[5]),
+    turnoverCny100m: toNumber(fields[7]) === null ? null : toNumber(fields[7]) / 10000,
+    quoteSource: "Tencent",
+  };
+}
+
+async function fetchSinaQuote(fund) {
+  const prefix = exchangePrefix(fund);
+  const text = await fetchText(`https://hq.sinajs.cn/list=${prefix}${fund.code}`, {
+    headers: { referer: "https://finance.sina.com.cn/" },
+  });
+  const match = text.match(/="([^"]*)"/);
+  const fields = match?.[1]?.split(",") || [];
+  const price = toNumber(fields[3]);
+  const previousClose = toNumber(fields[2]);
+  if (fields.length < 10 || price === null || previousClose === null) throw new Error(`Sina quote missing data for ${fund.code}`);
+  return {
+    code: fund.code,
+    name: fields[0],
+    price,
+    previousClose,
+    marketChangePct: previousClose ? ((price - previousClose) / previousClose) * 100 : null,
+    turnoverCny100m: toNumber(fields[9]) === null ? null : toNumber(fields[9]) / 100000000,
+    quoteSource: "Sina",
+  };
+}
+
+async function fetchFallbackQuote(fund) {
+  const attempts = [() => fetchTencentQuote(fund), () => fetchSinaQuote(fund), () => fetchEastmoneyQuote(fund)];
+  let lastError;
+  for (const attempt of attempts) {
+    try {
+      return await attempt();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`No quote source available for ${fund.code}`);
+}
+
 async function buildOnExchangeFunds() {
+  let quoteBatch = new Map();
+  try {
+    quoteBatch = await fetchEastmoneyQuoteBatch(ON_EXCHANGE_FUNDS);
+  } catch {
+    quoteBatch = new Map();
+  }
+
   const rows = await Promise.allSettled(
     ON_EXCHANGE_FUNDS.map(async (fund) => {
-      const [quoteResult, detailResult] = await Promise.allSettled([fetchEastmoneyQuote(fund), fetchFundDetail(fund.code)]);
+      const quoteTask = quoteBatch.has(fund.code) ? Promise.resolve(quoteBatch.get(fund.code)) : fetchFallbackQuote(fund);
+      const [quoteResult, detailResult] = await Promise.allSettled([quoteTask, fetchFundDetail(fund.code)]);
       const quote = quoteResult.status === "fulfilled" ? quoteResult.value : {};
       const detail = detailResult.status === "fulfilled" ? detailResult.value : {};
       if (!quote.name && !detail.name) throw new Error(`No listed ETF data for ${fund.code}`);
@@ -205,6 +291,7 @@ async function buildOnExchangeFunds() {
         feeRatePct: fund.feeRatePct,
         dailyLimit: null,
         purchaseStatus: null,
+        quoteSource: quote.quoteSource || null,
       });
     }),
   );
@@ -444,6 +531,31 @@ async function dashboard(env) {
   }
 }
 
+async function quoteDiagnostics() {
+  const sampleFunds = [ON_EXCHANGE_FUNDS[0], ON_EXCHANGE_FUNDS[2]];
+  const checks = [];
+  checks.push({
+    source: "Eastmoney batch",
+    result: await Promise.allSettled([fetchEastmoneyQuoteBatch(sampleFunds)]).then(([result]) => {
+      if (result.status === "rejected") return { ok: false, error: result.reason.message };
+      return { ok: true, rows: [...result.value.values()].map((row) => compactObject({ code: row.code, price: row.price, change: row.marketChangePct, turnover: row.turnoverCny100m })) };
+    }),
+  });
+  for (const fund of sampleFunds) {
+    for (const [source, fn] of [
+      ["Tencent", fetchTencentQuote],
+      ["Sina", fetchSinaQuote],
+    ]) {
+      const result = await Promise.allSettled([fn(fund)]).then(([item]) => {
+        if (item.status === "rejected") return { ok: false, code: fund.code, error: item.reason.message };
+        return { ok: true, code: fund.code, price: item.value.price, change: item.value.marketChangePct, turnover: item.value.turnoverCny100m };
+      });
+      checks.push({ source, result });
+    }
+  }
+  return json({ checkedAt: new Date().toISOString(), checks });
+}
+
 async function health(env) {
   let database = "unavailable";
   if (env.DB) {
@@ -506,6 +618,7 @@ export default {
     }
     if (url.pathname === "/api/v1/health") return health(env);
     if (url.pathname === "/api/v1/etf/dashboard") return dashboard(env);
+    if (url.pathname === "/api/v1/etf/diagnostics/quotes") return quoteDiagnostics();
     if (url.pathname.startsWith("/api/")) return errorResponse(404, "NOT_FOUND", "API route not found.");
     return env.ASSETS.fetch(request);
   },

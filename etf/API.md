@@ -71,6 +71,15 @@ Current public sources:
 
 Known limitations:
 
+- Listed ETF quotes use a multi-source fallback: Eastmoney batch quotes first, then Tencent, then Sina.
 - Listed ETF premium currently uses the latest available fund NAV against the exchange price, so date gaps can make the figure an estimate rather than same-timestamp IOPV premium.
 - Purchase status, daily subscription limits, and tracking error are intentionally left `null` until a reliable announcement/status source or manual admin workflow is added.
 - Public web sources can change response formats. The Worker fails closed and keeps the previous verified snapshot instead of inventing values.
+
+Operational diagnostics:
+
+```text
+GET /api/v1/etf/diagnostics/quotes
+```
+
+This read-only endpoint checks the listed-ETF quote fallbacks from the deployed runtime and returns only source health plus sample price fields.
