@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 7;
+const UNIVERSE_VERSION = 8;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -927,8 +927,27 @@ async function dashboard(env) {
 }
 
 async function quoteDiagnostics() {
-  const sampleFunds = (await discoverOnExchangeFunds()).slice(0, 2);
+  const discoveredFunds = await discoverOnExchangeFunds();
+  const sampleFunds = discoveredFunds.slice(0, 2);
+  const quoteCandidates = uniqueByCode([...FALLBACK_ON_EXCHANGE_FUNDS, ...discoveredFunds]).slice(0, 24);
+  const individualMap = await fetchIndividualQuoteMap(quoteCandidates);
   const checks = [];
+  checks.push({
+    source: "Discovered universe",
+    result: {
+      ok: true,
+      discovered: discoveredFunds.length,
+      quoteCandidates: quoteCandidates.length,
+      individualQuotes: individualMap.size,
+      individualSamples: [...individualMap.values()].slice(0, 5).map((row) => compactObject({
+        code: row.code,
+        price: row.price,
+        change: row.marketChangePct,
+        turnover: row.turnoverCny100m,
+        source: row.quoteSource,
+      })),
+    },
+  });
   checks.push({
     source: "Eastmoney batch",
     result: await Promise.allSettled([fetchEastmoneyQuoteBatch(sampleFunds)]).then(([result]) => {
