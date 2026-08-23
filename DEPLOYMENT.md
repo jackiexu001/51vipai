@@ -166,7 +166,7 @@ npm run db:migrate:remote
 npm run deploy
 ```
 
-Worker 仅接管 `www.51vipai.com/api/*`，现有 Cloudflare Pages 继续托管 HTML、CSS 和 JavaScript。正式迁移数据库和部署会改变 Cloudflare 线上资源，应在确认账户及数据源后再执行。
+同一个 Worker 托管现有 HTML、CSS、JavaScript，并让 `/api/*` 优先进入后端逻辑。这样兼容 Cloudflare Git 部署把自定义域名直接绑定到 Worker 的方式。正式迁移数据库和部署会改变 Cloudflare 线上资源，应在确认账户及数据源后再执行。
 
 ### 什么时候需要服务器？
 

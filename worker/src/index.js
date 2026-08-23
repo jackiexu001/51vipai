@@ -92,7 +92,7 @@ export default {
     if (url.pathname === "/api/v1/health") return health(env);
     if (url.pathname === "/api/v1/etf/dashboard") return dashboard(env);
     if (url.pathname.startsWith("/api/")) return errorResponse(404, "NOT_FOUND", "API route not found.");
-    return errorResponse(404, "NOT_FOUND", "This Worker only serves the /api namespace.");
+    return env.ASSETS.fetch(request);
   },
 
   async scheduled(_event, env, ctx) {

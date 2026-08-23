@@ -1,0 +1,11 @@
+.git/
+.agents/
+.codex/
+.wrangler/
+node_modules/
+worker/
+migrations/
+package.json
+package-lock.json
+wrangler.jsonc
+*.md
