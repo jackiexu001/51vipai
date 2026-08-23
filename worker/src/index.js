@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 13;
+const UNIVERSE_VERSION = 14;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -191,6 +191,15 @@ function chunks(values, size) {
   const result = [];
   for (let index = 0; index < values.length; index += size) result.push(values.slice(index, index + size));
   return result;
+}
+
+async function mapInChunks(values, size, mapper) {
+  const results = [];
+  for (const group of chunks(values, size)) {
+    const settled = await Promise.allSettled(group.map(mapper));
+    results.push(...settled);
+  }
+  return results;
 }
 
 function formatPct(value) {
@@ -364,6 +373,18 @@ async function fetchFundDetail(code) {
     navDate: latestNetWorth?.x ? new Date(latestNetWorth.x).toISOString() : null,
     scaleCny100m: toNumber(latestScale),
   };
+}
+
+async function fetchFundDetailWithRetry(code) {
+  let lastError;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await fetchFundDetail(code);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`Fund detail unavailable for ${code}`);
 }
 
 async function fetchEastmoneyQuote(fund) {
@@ -600,7 +621,7 @@ async function buildOnExchangeFunds() {
   const rows = await Promise.allSettled(
     sortedFunds.map(async (fund) => {
       const quoteTask = Promise.resolve(quoteBatch.get(fund.code) || {});
-      const detailTask = enrichedCodes.has(fund.code) ? fetchFundDetail(fund.code) : Promise.resolve({});
+      const detailTask = enrichedCodes.has(fund.code) ? fetchFundDetailWithRetry(fund.code) : Promise.resolve({});
       const [quoteResult, detailResult] = await Promise.allSettled([quoteTask, detailTask]);
       const quote = quoteResult.status === "fulfilled" ? quoteResult.value : {};
       const detail = detailResult.status === "fulfilled" ? detailResult.value : {};
@@ -687,7 +708,7 @@ function isLikelyActiveUsQdii(name) {
 async function enrichQdiiFund(row) {
   let detail = {};
   try {
-    detail = await fetchFundDetail(row.code);
+    detail = await fetchFundDetailWithRetry(row.code);
   } catch {
     detail = {};
   }
@@ -712,7 +733,7 @@ async function enrichQdiiFund(row) {
 async function buildIndexQdiiFund(fund) {
   let detail = {};
   try {
-    detail = await fetchFundDetail(fund.code);
+    detail = await fetchFundDetailWithRetry(fund.code);
   } catch {
     detail = {};
   }
@@ -762,12 +783,22 @@ async function buildQdiiDatasets() {
     ...dedupedIndexFunds.filter((fund) => fund.category === "sp500").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
   ];
   const activeSelection = uniqueByCode(rankRows.filter((row) => isLikelyActiveUsQdii(row.name))).slice(0, ACTIVE_QDII_LIMIT);
-  const enriched = await Promise.allSettled([
-    ...indexSelection.map((fund) => buildIndexQdiiFund({
+  const enriched = await mapInChunks([
+    ...indexSelection.map((fund) => ({
+      type: "index",
+      fund: {
       ...fund,
       feeRatePct: fund.feeRatePct ?? rankedByCode.get(fund.code)?.feeRatePct ?? null,
+      },
     })),
-    ...activeSelection.map((fund) => Promise.resolve({
+    ...activeSelection.map((fund) => ({
+      type: "active",
+      fund,
+    })),
+  ], 4, (item) => {
+    if (item.type === "index") return buildIndexQdiiFund(item.fund);
+    const fund = item.fund;
+    return Promise.resolve({
       code: fund.code,
       name: fund.name,
       trackingIndex: trackingIndexForFund(fund.name, "active"),
@@ -781,8 +812,8 @@ async function buildQdiiDatasets() {
       dailyLimit: null,
       purchaseStatus: null,
       _category: "active",
-    })),
-  ]);
+    });
+  });
   const funds = enriched.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
   return {
     nasdaq: funds.filter((fund) => fund._category === "nasdaq").map(({ _category, ...fund }) => fund),
@@ -866,6 +897,71 @@ async function persistSnapshot(env, snapshot) {
     .run();
 }
 
+async function loadPreviousDashboardSnapshots(env, limit = 5) {
+  if (!env.DB) return [];
+  try {
+    const result = await env.DB.prepare(
+      `SELECT payload_json
+       FROM dashboard_snapshots
+       WHERE is_valid = 1
+       ORDER BY as_of DESC
+       LIMIT ?`,
+    ).bind(limit).all();
+    return (result.results || []).flatMap((row) => {
+      try {
+        return [JSON.parse(row.payload_json)];
+      } catch {
+        return [];
+      }
+    });
+  } catch {
+    return [];
+  }
+}
+
+function buildHistoricalFundMap(snapshots) {
+  const map = new Map();
+  for (const snapshot of snapshots) {
+    for (const rows of Object.values(snapshot.datasets || {})) {
+      if (!Array.isArray(rows)) continue;
+      for (const row of rows) {
+        if (row?.code && !map.has(row.code)) map.set(row.code, row);
+      }
+    }
+  }
+  return map;
+}
+
+function backfillFundRows(rows, previousByCode) {
+  return rows.map((row) => {
+    const previous = previousByCode.get(row.code);
+    if (!previous) return row;
+    return {
+      ...row,
+      name: row.name || previous.name,
+      trackingIndex: row.trackingIndex || previous.trackingIndex,
+      scaleCny100m: row.scaleCny100m ?? previous.scaleCny100m,
+      return1yPct: row.return1yPct ?? previous.return1yPct,
+      feeRatePct: row.feeRatePct ?? previous.feeRatePct,
+      dailyLimit: row.dailyLimit ?? previous.dailyLimit,
+      purchaseStatus: row.purchaseStatus ?? previous.purchaseStatus,
+    };
+  });
+}
+
+async function backfillSnapshotFromHistory(env, snapshot) {
+  const previousSnapshots = await loadPreviousDashboardSnapshots(env);
+  if (!previousSnapshots.length) return snapshot;
+  const previousByCode = buildHistoricalFundMap(previousSnapshots);
+  return {
+    ...snapshot,
+    datasets: Object.fromEntries(Object.entries(snapshot.datasets).map(([key, rows]) => [
+      key,
+      backfillFundRows(rows, previousByCode),
+    ])),
+  };
+}
+
 async function dashboard(env) {
   if (!env.DB) return errorResponse(503, "DATABASE_UNAVAILABLE", "ETF database binding is not configured.");
 
@@ -899,7 +995,7 @@ async function dashboard(env) {
 
   if (!row) {
     try {
-      const liveSnapshot = await buildDashboardSnapshot();
+      const liveSnapshot = await backfillSnapshotFromHistory(env, await buildDashboardSnapshot());
       await persistSnapshot(env, liveSnapshot);
       return json(liveSnapshot, {
         headers: {
@@ -914,7 +1010,7 @@ async function dashboard(env) {
 
   if (row && snapshotNeedsRefresh(row)) {
     try {
-      const liveSnapshot = await buildDashboardSnapshot();
+      const liveSnapshot = await backfillSnapshotFromHistory(env, await buildDashboardSnapshot());
       await persistSnapshot(env, liveSnapshot);
       return json(liveSnapshot, {
         headers: {
