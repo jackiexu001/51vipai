@@ -68,9 +68,11 @@ Current public sources:
 | Listed ETF quotes | Eastmoney quote API | Exchange price change and turnover |
 | Fund details | Eastmoney fund detail script | Fund name, one-year return, latest NAV, latest scale |
 | QDII ranking | Eastmoney QDII ranking script | Active QDII selection and one-year return fallback |
+| Fund discovery | Eastmoney fund search API | Broader listed ETF, Nasdaq, and S&P 500 fund universe discovery |
 
 Known limitations:
 
+- The fund universe is discovered dynamically from public search/ranking sources and capped per category to keep Worker refreshes stable.
 - Listed ETF quotes use a multi-source fallback: Eastmoney batch quotes first, then Tencent, then Sina.
 - Listed ETF premium currently uses the latest available fund NAV against the exchange price, so date gaps can make the figure an estimate rather than same-timestamp IOPV premium.
 - Purchase status, daily subscription limits, and tracking error are intentionally left `null` until a reliable announcement/status source or manual admin workflow is added.

@@ -9,7 +9,7 @@ const SOURCE_LABEL = "东方财富公开数据 + Yahoo Finance 延迟行情";
 const USER_AGENT =
   "Mozilla/5.0 (compatible; 51vipai-etf/1.0; +https://www.51vipai.com/)";
 
-const ON_EXCHANGE_FUNDS = [
+const FALLBACK_ON_EXCHANGE_FUNDS = [
   { code: "513100", market: 1, trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
   { code: "513110", market: 1, trackingIndex: "纳斯达克100", feeRatePct: 1.0 },
   { code: "159941", market: 0, trackingIndex: "纳斯达克100", feeRatePct: 1.0 },
@@ -22,7 +22,7 @@ const ON_EXCHANGE_FUNDS = [
   { code: "513730", market: 1, trackingIndex: "标普500", feeRatePct: 0.8 },
 ];
 
-const INDEX_QDII_FUNDS = [
+const FALLBACK_INDEX_QDII_FUNDS = [
   { code: "040046", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
   { code: "270042", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
   { code: "000834", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
@@ -31,6 +31,35 @@ const INDEX_QDII_FUNDS = [
   { code: "050025", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
   { code: "161125", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
   { code: "007721", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
+];
+
+const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
+const UNIVERSE_VERSION = 2;
+const ON_EXCHANGE_DETAIL_LIMIT = 12;
+const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
+const ACTIVE_QDII_LIMIT = 36;
+
+const ON_EXCHANGE_SEARCH_TERMS = [
+  "纳指",
+  "纳斯达克",
+  "标普500",
+  "标普",
+  "中概",
+  "恒生科技",
+  "港股互联网",
+  "日经",
+  "德国ETF",
+  "法国ETF",
+  "美国50",
+  "东南亚科技",
+];
+
+const INDEX_QDII_SEARCH_TERMS = [
+  "纳斯达克100指数",
+  "纳斯达克100ETF联接",
+  "纳指联接",
+  "标普500ETF联接",
+  "标普500指数",
 ];
 
 const CORE_SCHEMA_STATEMENTS = [
@@ -142,8 +171,39 @@ function compactObject(value) {
   return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined));
 }
 
+function uniqueByCode(rows) {
+  const seen = new Map();
+  for (const row of rows) {
+    if (!row?.code || seen.has(row.code)) continue;
+    seen.set(row.code, row);
+  }
+  return [...seen.values()];
+}
+
+function compareNumberDesc(a, b) {
+  if (a == null && b == null) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return b - a;
+}
+
 function formatPct(value) {
   return value === null ? "—" : `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+function isSnapshotFresh(asOf) {
+  const timestamp = Date.parse(asOf);
+  return Number.isFinite(timestamp) && Date.now() - timestamp < SNAPSHOT_MAX_AGE_MS;
+}
+
+function snapshotNeedsRefresh(row) {
+  if (!row || !isSnapshotFresh(row.as_of)) return true;
+  try {
+    const payload = JSON.parse(row.payload_json);
+    return payload?.meta?.universeVersion !== UNIVERSE_VERSION;
+  } catch {
+    return true;
+  }
 }
 
 function marketTimestamp(meta) {
@@ -168,6 +228,51 @@ async function fetchText(url, options = {}) {
 async function fetchJson(url, options = {}) {
   const text = await fetchText(url, options);
   return JSON.parse(text);
+}
+
+async function fetchFundSearch(term) {
+  const data = await fetchJson(
+    `https://fundsuggest.eastmoney.com/FundSearch/api/FundSearchAPI.ashx?m=1&key=${encodeURIComponent(term)}`,
+    { headers: { referer: "https://fund.eastmoney.com/" } },
+  );
+  const rows = Array.isArray(data?.Datas) ? data.Datas : [];
+  return rows.map((row) => ({
+    code: String(row.CODE || row.code || ""),
+    name: String(row.NAME || row.name || ""),
+  })).filter((row) => row.code && row.name);
+}
+
+function marketForCode(code) {
+  if (/^1/.test(code)) return 0;
+  if (/^5/.test(code)) return 1;
+  return null;
+}
+
+function isListedEtf(row) {
+  return /ETF/i.test(row.name) && marketForCode(row.code) !== null;
+}
+
+function isCrossBorderEtfName(name) {
+  if (/工业互联网|互联网龙头|互联网ETF东财/.test(name)) return false;
+  return /纳指|纳斯达克|标普|中概|恒生|港股|日经|德国|法国|美国|东南亚|亚太/i.test(name);
+}
+
+function trackingIndexForListedEtf(name) {
+  if (/纳指|纳斯达克/i.test(name)) return "纳斯达克100";
+  if (/标普500/i.test(name)) return "标普500";
+  if (/标普油气/i.test(name)) return "标普油气";
+  if (/标普生物/i.test(name)) return "标普生物科技";
+  if (/标普消费/i.test(name)) return "标普消费";
+  if (/中概/i.test(name)) return "中概互联网";
+  if (/恒生科技/i.test(name)) return "恒生科技";
+  if (/港股.*互联网|恒生互联网/i.test(name)) return "港股互联网";
+  if (/日经/i.test(name)) return "日经225";
+  if (/德国/i.test(name)) return "德国DAX";
+  if (/法国/i.test(name)) return "法国CAC40";
+  if (/美国50/i.test(name)) return "美国50";
+  if (/东南亚/i.test(name)) return "东南亚科技";
+  if (/亚太/i.test(name)) return "亚太精选";
+  return "跨境 ETF";
 }
 
 async function fetchYahooChart(symbol) {
@@ -316,6 +421,34 @@ async function fetchTencentQuote(fund) {
   };
 }
 
+function parseTencentQuoteLine(line, fund) {
+  const match = line.match(/="([^"]*)"/);
+  const fields = match?.[1]?.split("~") || [];
+  if (fields.length < 8 || (fund && fields[2] !== fund.code)) return null;
+  return {
+    code: fields[2],
+    name: fund?.name || fields[1],
+    price: toNumber(fields[3]),
+    marketChangePct: toNumber(fields[5]),
+    turnoverCny100m: toNumber(fields[7]) === null ? null : toNumber(fields[7]) / 10000,
+    quoteSource: "Tencent",
+  };
+}
+
+async function fetchTencentQuoteBatch(funds) {
+  if (!funds.length) return new Map();
+  const fundByCode = new Map(funds.map((fund) => [fund.code, fund]));
+  const symbols = funds.map((fund) => `s_${exchangePrefix(fund)}${fund.code}`).join(",");
+  const text = await fetchText(`https://qt.gtimg.cn/q=${symbols}`, {
+    headers: { referer: "https://gu.qq.com/" },
+  });
+  const rows = text.split(";").map((line) => {
+    const code = line.match(/v_s_(?:sh|sz)(\d+)/)?.[1];
+    return parseTencentQuoteLine(line, code ? fundByCode.get(code) : null);
+  }).filter(Boolean);
+  return new Map(rows.map((row) => [row.code, row]));
+}
+
 async function fetchSinaQuote(fund) {
   const prefix = exchangePrefix(fund);
   const text = await fetchText(`https://hq.sinajs.cn/list=${prefix}${fund.code}`, {
@@ -337,6 +470,38 @@ async function fetchSinaQuote(fund) {
   };
 }
 
+function parseSinaQuoteLine(line, fund) {
+  const code = line.match(/hq_str_(?:sh|sz)(\d+)/)?.[1];
+  const match = line.match(/="([^"]*)"/);
+  const fields = match?.[1]?.split(",") || [];
+  const price = toNumber(fields[3]);
+  const previousClose = toNumber(fields[2]);
+  if (!code || fields.length < 10 || price === null || previousClose === null) return null;
+  return {
+    code,
+    name: fund?.name || fields[0],
+    price,
+    previousClose,
+    marketChangePct: previousClose ? ((price - previousClose) / previousClose) * 100 : null,
+    turnoverCny100m: toNumber(fields[9]) === null ? null : toNumber(fields[9]) / 100000000,
+    quoteSource: "Sina",
+  };
+}
+
+async function fetchSinaQuoteBatch(funds) {
+  if (!funds.length) return new Map();
+  const fundByCode = new Map(funds.map((fund) => [fund.code, fund]));
+  const symbols = funds.map((fund) => `${exchangePrefix(fund)}${fund.code}`).join(",");
+  const text = await fetchText(`https://hq.sinajs.cn/list=${symbols}`, {
+    headers: { referer: "https://finance.sina.com.cn/" },
+  });
+  const rows = text.split(";").map((line) => {
+    const code = line.match(/hq_str_(?:sh|sz)(\d+)/)?.[1];
+    return parseSinaQuoteLine(line, code ? fundByCode.get(code) : null);
+  }).filter(Boolean);
+  return new Map(rows.map((row) => [row.code, row]));
+}
+
 async function fetchFallbackQuote(fund) {
   const attempts = [() => fetchTencentQuote(fund), () => fetchSinaQuote(fund), () => fetchEastmoneyQuote(fund)];
   let lastError;
@@ -350,25 +515,55 @@ async function fetchFallbackQuote(fund) {
   throw lastError || new Error(`No quote source available for ${fund.code}`);
 }
 
-async function buildOnExchangeFunds() {
-  let quoteBatch = new Map();
-  try {
-    quoteBatch = await fetchEastmoneyQuoteBatch(ON_EXCHANGE_FUNDS);
-  } catch {
-    quoteBatch = new Map();
+async function fetchQuoteMap(funds) {
+  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatch, fetchSinaQuoteBatch]) {
+    try {
+      const quotes = await loader(funds);
+      if (quotes.size) return quotes;
+    } catch {
+      // Try the next quote source.
+    }
   }
+  return new Map();
+}
+
+async function discoverOnExchangeFunds() {
+  const searchResults = await Promise.allSettled(ON_EXCHANGE_SEARCH_TERMS.map(fetchFundSearch));
+  const discovered = uniqueByCode(searchResults
+    .flatMap((result) => (result.status === "fulfilled" ? result.value : []))
+    .filter((row) => isListedEtf(row) && isCrossBorderEtfName(row.name))
+    .map((row) => ({
+      code: row.code,
+      name: row.name,
+      market: marketForCode(row.code),
+      trackingIndex: trackingIndexForListedEtf(row.name),
+      feeRatePct: null,
+    })));
+  return discovered.length ? discovered : FALLBACK_ON_EXCHANGE_FUNDS;
+}
+
+async function buildOnExchangeFunds() {
+  const funds = await discoverOnExchangeFunds();
+  const quoteBatch = await fetchQuoteMap(funds);
+  const sortedFunds = [...funds].sort((a, b) => {
+    const turnoverA = quoteBatch.get(a.code)?.turnoverCny100m ?? -1;
+    const turnoverB = quoteBatch.get(b.code)?.turnoverCny100m ?? -1;
+    return turnoverB - turnoverA;
+  });
+  const enrichedCodes = new Set(sortedFunds.slice(0, ON_EXCHANGE_DETAIL_LIMIT).map((fund) => fund.code));
 
   const rows = await Promise.allSettled(
-    ON_EXCHANGE_FUNDS.map(async (fund) => {
+    sortedFunds.map(async (fund) => {
       const quoteTask = quoteBatch.has(fund.code) ? Promise.resolve(quoteBatch.get(fund.code)) : fetchFallbackQuote(fund);
-      const [quoteResult, detailResult] = await Promise.allSettled([quoteTask, fetchFundDetail(fund.code)]);
+      const detailTask = enrichedCodes.has(fund.code) ? fetchFundDetail(fund.code) : Promise.resolve({});
+      const [quoteResult, detailResult] = await Promise.allSettled([quoteTask, detailTask]);
       const quote = quoteResult.status === "fulfilled" ? quoteResult.value : {};
       const detail = detailResult.status === "fulfilled" ? detailResult.value : {};
       if (!quote.name && !detail.name) throw new Error(`No listed ETF data for ${fund.code}`);
       const premiumPct = quote.price && detail.nav ? ((quote.price - detail.nav) / detail.nav) * 100 : null;
       return compactObject({
         code: fund.code,
-        name: detail.name || quote.name || fund.code,
+        name: detail.name || fund.name || quote.name || fund.code,
         trackingIndex: fund.trackingIndex,
         scaleCny100m: detail.scaleCny100m,
         return1yPct: detail.return1yPct,
@@ -383,7 +578,9 @@ async function buildOnExchangeFunds() {
       });
     }),
   );
-  return rows.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  return rows
+    .flatMap((result) => (result.status === "fulfilled" ? [result.value] : []))
+    .sort((a, b) => compareNumberDesc(a.turnoverCny100m, b.turnoverCny100m));
 }
 
 async function fetchQdiiRankRows() {
@@ -410,9 +607,8 @@ async function fetchQdiiRankRows() {
 }
 
 function qdiiCategory(name) {
-  if (/纳斯达克|NASDAQ|Nasdaq/i.test(name)) return "nasdaq";
-  if (/标普|S&P|SP500|500ETF联接/i.test(name)) return "sp500";
-  if (/美元|C类|C份额|人民币C|联接C/.test(name)) return null;
+  if (/纳斯达克|NASDAQ|Nasdaq|纳指/i.test(name)) return "nasdaq";
+  if (/标普500|标普 500|S&P\s*500|SP500|500ETF联接|500指数/i.test(name)) return "sp500";
   return "active";
 }
 
@@ -421,6 +617,11 @@ function trackingIndexForFund(name, category) {
   if (category === "sp500") return "标普500";
   if (/科技|互联网|移动互联|全球成长|全球产业|高端制造|新兴市场|亚洲机会/.test(name)) return "主动美股/QDII";
   return "QDII";
+}
+
+function isLikelyActiveUsQdii(name) {
+  if (/纳斯达克|纳指|标普|S&P|SP500|500ETF联接|500指数/i.test(name)) return false;
+  return /美国|美股|全球科技|科技互联|互联网|全球产业|全球高端制造|全球创新|全球股票|全球消费|全球医疗|全球医药|全球芯片|全球人工智能|全球AI/i.test(name);
 }
 
 async function enrichQdiiFund(row) {
@@ -467,12 +668,55 @@ async function buildIndexQdiiFund(fund) {
   });
 }
 
+async function discoverIndexQdiiFunds() {
+  const searchResults = await Promise.allSettled(INDEX_QDII_SEARCH_TERMS.map(fetchFundSearch));
+  const discovered = uniqueByCode(searchResults
+    .flatMap((result) => (result.status === "fulfilled" ? result.value : []))
+    .filter((row) => !isListedEtf(row))
+    .map((row) => {
+      const category = qdiiCategory(row.name);
+      if (!["nasdaq", "sp500"].includes(category)) return null;
+      return {
+        code: row.code,
+        name: row.name,
+        category,
+        trackingIndex: trackingIndexForFund(row.name, category),
+        feeRatePct: null,
+      };
+    })
+    .filter(Boolean));
+  return discovered.length ? discovered : FALLBACK_INDEX_QDII_FUNDS;
+}
+
 async function buildQdiiDatasets() {
-  const rows = (await fetchQdiiRankRows()).filter((row) => qdiiCategory(row.name));
-  const selected = rows.filter((row) => qdiiCategory(row.name) === "active").slice(0, 12);
+  const [rankRows, indexFunds] = await Promise.all([fetchQdiiRankRows(), discoverIndexQdiiFunds()]);
+  const rankedByCode = new Map(rankRows.map((row) => [row.code, row]));
+  const dedupedIndexFunds = uniqueByCode(indexFunds);
+  const indexSelection = [
+    ...dedupedIndexFunds.filter((fund) => fund.category === "nasdaq").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
+    ...dedupedIndexFunds.filter((fund) => fund.category === "sp500").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
+  ];
+  const activeSelection = uniqueByCode(rankRows.filter((row) => isLikelyActiveUsQdii(row.name))).slice(0, ACTIVE_QDII_LIMIT);
   const enriched = await Promise.allSettled([
-    ...INDEX_QDII_FUNDS.map(buildIndexQdiiFund),
-    ...selected.map(enrichQdiiFund),
+    ...indexSelection.map((fund) => buildIndexQdiiFund({
+      ...fund,
+      feeRatePct: fund.feeRatePct ?? rankedByCode.get(fund.code)?.feeRatePct ?? null,
+    })),
+    ...activeSelection.map((fund) => Promise.resolve({
+      code: fund.code,
+      name: fund.name,
+      trackingIndex: trackingIndexForFund(fund.name, "active"),
+      scaleCny100m: null,
+      return1yPct: fund.return1yPct,
+      marketChangePct: null,
+      premiumPct: null,
+      turnoverCny100m: null,
+      trackingErrorPct: null,
+      feeRatePct: fund.feeRatePct,
+      dailyLimit: null,
+      purchaseStatus: null,
+      _category: "active",
+    })),
   ]);
   const funds = enriched.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
   return {
@@ -501,6 +745,7 @@ async function buildDashboardSnapshot() {
       asOf: generatedAt,
       generatedAt,
       version: 1,
+      universeVersion: UNIVERSE_VERSION,
     },
     metrics,
     datasets: {
@@ -602,6 +847,22 @@ async function dashboard(env) {
     }
   }
 
+  if (row && snapshotNeedsRefresh(row)) {
+    try {
+      const liveSnapshot = await buildDashboardSnapshot();
+      await persistSnapshot(env, liveSnapshot);
+      return json(liveSnapshot, {
+        headers: {
+          "cache-control": "public, max-age=60, stale-while-revalidate=300",
+          "x-etf-as-of": liveSnapshot.meta.asOf,
+          "x-etf-storage": "refreshed",
+        },
+      });
+    } catch {
+      // Keep serving the previous verified snapshot if refresh fails.
+    }
+  }
+
   try {
     const payload = JSON.parse(row.payload_json);
     payload.meta = {
@@ -623,7 +884,7 @@ async function dashboard(env) {
 }
 
 async function quoteDiagnostics() {
-  const sampleFunds = [ON_EXCHANGE_FUNDS[0], ON_EXCHANGE_FUNDS[2]];
+  const sampleFunds = (await discoverOnExchangeFunds()).slice(0, 2);
   const checks = [];
   checks.push({
     source: "Eastmoney batch",
