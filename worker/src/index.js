@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 8;
+const UNIVERSE_VERSION = 9;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -451,7 +451,7 @@ async function fetchTencentQuoteBatch(funds) {
   const rows = text.split(";").map((line) => {
     const code = line.match(/v_s_(?:sh|sz)(\d+)/)?.[1];
     return parseTencentQuoteLine(line, code ? fundByCode.get(code) : null);
-  }).filter(Boolean);
+  }).filter((row) => row?.code && fundByCode.has(row.code));
   return new Map(rows.map((row) => [row.code, row]));
 }
 
@@ -513,7 +513,7 @@ async function fetchSinaQuoteBatch(funds) {
   const rows = text.split(";").map((line) => {
     const code = line.match(/hq_str_(?:sh|sz)(\d+)/)?.[1];
     return parseSinaQuoteLine(line, code ? fundByCode.get(code) : null);
-  }).filter(Boolean);
+  }).filter((row) => row?.code && fundByCode.has(row.code));
   return new Map(rows.map((row) => [row.code, row]));
 }
 
@@ -555,10 +555,12 @@ async function fetchFallbackQuote(fund) {
 }
 
 async function fetchQuoteMap(funds) {
+  const targetCodes = new Set(funds.map((fund) => fund.code));
   for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatchChunked, fetchSinaQuoteBatchChunked]) {
     try {
       const quotes = await loader(funds);
-      if (quotes.size) return quotes;
+      const matching = [...quotes].filter(([code]) => targetCodes.has(code));
+      if (matching.length) return new Map(matching);
     } catch {
       // Try the next quote source.
     }
