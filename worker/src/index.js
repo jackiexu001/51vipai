@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 2;
+const UNIVERSE_VERSION = 3;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -185,6 +185,12 @@ function compareNumberDesc(a, b) {
   if (a == null) return 1;
   if (b == null) return -1;
   return b - a;
+}
+
+function chunks(values, size) {
+  const result = [];
+  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, index + size));
+  return result;
 }
 
 function formatPct(value) {
@@ -449,6 +455,15 @@ async function fetchTencentQuoteBatch(funds) {
   return new Map(rows.map((row) => [row.code, row]));
 }
 
+async function fetchTencentQuoteBatchChunked(funds) {
+  const merged = new Map();
+  for (const group of chunks(funds, 20)) {
+    const quotes = await fetchTencentQuoteBatch(group);
+    for (const [code, quote] of quotes) merged.set(code, quote);
+  }
+  return merged;
+}
+
 async function fetchSinaQuote(fund) {
   const prefix = exchangePrefix(fund);
   const text = await fetchText(`https://hq.sinajs.cn/list=${prefix}${fund.code}`, {
@@ -502,6 +517,15 @@ async function fetchSinaQuoteBatch(funds) {
   return new Map(rows.map((row) => [row.code, row]));
 }
 
+async function fetchSinaQuoteBatchChunked(funds) {
+  const merged = new Map();
+  for (const group of chunks(funds, 20)) {
+    const quotes = await fetchSinaQuoteBatch(group);
+    for (const [code, quote] of quotes) merged.set(code, quote);
+  }
+  return merged;
+}
+
 async function fetchFallbackQuote(fund) {
   const attempts = [() => fetchTencentQuote(fund), () => fetchSinaQuote(fund), () => fetchEastmoneyQuote(fund)];
   let lastError;
@@ -516,7 +540,7 @@ async function fetchFallbackQuote(fund) {
 }
 
 async function fetchQuoteMap(funds) {
-  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatch, fetchSinaQuoteBatch]) {
+  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatchChunked, fetchSinaQuoteBatchChunked]) {
     try {
       const quotes = await loader(funds);
       if (quotes.size) return quotes;
@@ -554,7 +578,7 @@ async function buildOnExchangeFunds() {
 
   const rows = await Promise.allSettled(
     sortedFunds.map(async (fund) => {
-      const quoteTask = quoteBatch.has(fund.code) ? Promise.resolve(quoteBatch.get(fund.code)) : fetchFallbackQuote(fund);
+      const quoteTask = Promise.resolve(quoteBatch.get(fund.code) || {});
       const detailTask = enrichedCodes.has(fund.code) ? fetchFundDetail(fund.code) : Promise.resolve({});
       const [quoteResult, detailResult] = await Promise.allSettled([quoteTask, detailTask]);
       const quote = quoteResult.status === "fulfilled" ? quoteResult.value : {};
