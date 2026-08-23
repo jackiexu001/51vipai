@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 6;
+const UNIVERSE_VERSION = 7;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -555,7 +555,7 @@ async function fetchFallbackQuote(fund) {
 }
 
 async function fetchQuoteMap(funds) {
-  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatchChunked, fetchSinaQuoteBatchChunked, fetchIndividualQuoteMap]) {
+  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatchChunked, fetchSinaQuoteBatchChunked]) {
     try {
       const quotes = await loader(funds);
       if (quotes.size) return quotes;
@@ -583,7 +583,11 @@ async function discoverOnExchangeFunds() {
 
 async function buildOnExchangeFunds() {
   const funds = await discoverOnExchangeFunds();
-  const quoteBatch = await fetchQuoteMap(funds);
+  let quoteBatch = await fetchQuoteMap(funds);
+  if (!quoteBatch.size) {
+    const quoteCandidates = uniqueByCode([...FALLBACK_ON_EXCHANGE_FUNDS, ...funds]).slice(0, 24);
+    quoteBatch = await fetchIndividualQuoteMap(quoteCandidates);
+  }
   const sortedFunds = [...funds].sort((a, b) => {
     const turnoverA = quoteBatch.get(a.code)?.turnoverCny100m ?? -1;
     const turnoverB = quoteBatch.get(b.code)?.turnoverCny100m ?? -1;
