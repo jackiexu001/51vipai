@@ -55,3 +55,22 @@ All fields except `code` and `name` may be `null` when the source does not provi
 | `purchaseStatus` | string | `open`, `limited`, or `suspended` |
 
 The production API should also expose field-level dates and provenance internally so incompatible dates can be rejected before this aggregate response is generated.
+
+## Phase 2 live data sources
+
+The second-stage Worker can generate and persist a live dashboard snapshot when no verified snapshot exists, and the scheduled Worker refreshes it every 15 minutes.
+
+Current public sources:
+
+| Area | Source | Current fields |
+|---|---|---|
+| Market metrics | Yahoo Finance chart API | S&P 500, Nasdaq 100, VIX, USD/CNY latest value and daily change |
+| Listed ETF quotes | Eastmoney quote API | Exchange price change and turnover |
+| Fund details | Eastmoney fund detail script | Fund name, one-year return, latest NAV, latest scale |
+| QDII ranking | Eastmoney QDII ranking script | Active QDII selection and one-year return fallback |
+
+Known limitations:
+
+- Listed ETF premium currently uses the latest available fund NAV against the exchange price, so date gaps can make the figure an estimate rather than same-timestamp IOPV premium.
+- Purchase status, daily subscription limits, and tracking error are intentionally left `null` until a reliable announcement/status source or manual admin workflow is added.
+- Public web sources can change response formats. The Worker fails closed and keeps the previous verified snapshot instead of inventing values.
