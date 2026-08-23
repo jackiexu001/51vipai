@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 4;
+const UNIVERSE_VERSION = 5;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -526,6 +526,16 @@ async function fetchSinaQuoteBatchChunked(funds) {
   return merged;
 }
 
+async function fetchIndividualQuoteMap(funds) {
+  const settled = await Promise.allSettled(funds.map(fetchTencentQuote));
+  const rows = settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  if (rows.length) return new Map(rows.map((row) => [row.code, row]));
+  const sinaSettled = await Promise.allSettled(funds.map(fetchSinaQuote));
+  return new Map(sinaSettled
+    .flatMap((result) => (result.status === "fulfilled" ? [result.value] : []))
+    .map((row) => [row.code, row]));
+}
+
 async function fetchFallbackQuote(fund) {
   const attempts = [() => fetchTencentQuote(fund), () => fetchSinaQuote(fund), () => fetchEastmoneyQuote(fund)];
   let lastError;
@@ -540,7 +550,7 @@ async function fetchFallbackQuote(fund) {
 }
 
 async function fetchQuoteMap(funds) {
-  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatchChunked, fetchSinaQuoteBatchChunked]) {
+  for (const loader of [fetchEastmoneyQuoteBatch, fetchTencentQuoteBatchChunked, fetchSinaQuoteBatchChunked, fetchIndividualQuoteMap]) {
     try {
       const quotes = await loader(funds);
       if (quotes.size) return quotes;
