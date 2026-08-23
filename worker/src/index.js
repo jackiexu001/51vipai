@@ -36,7 +36,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 17;
+const UNIVERSE_VERSION = 18;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -1064,7 +1064,7 @@ async function persistSnapshot(env, snapshot) {
     `INSERT INTO dashboard_snapshots (as_of, generated_at, source, payload_json, checksum, is_valid)
      VALUES (?, ?, ?, ?, ?, 1)`,
   )
-    .bind(snapshot.meta.asOf, snapshot.meta.generatedAt, SOURCE_LABEL, payloadJson, await checksum(payloadJson))
+    .bind(snapshot.meta.asOf, snapshot.meta.generatedAt, snapshot.meta.source || SOURCE_LABEL, payloadJson, await checksum(payloadJson))
     .run();
 }
 
@@ -1199,10 +1199,8 @@ async function dashboard(env) {
     const payload = JSON.parse(row.payload_json);
     payload.meta = {
       ...payload.meta,
-      source: row.source,
       asOf: row.as_of,
       generatedAt: row.generated_at,
-      version: 1,
     };
     return json(payload, {
       headers: {

@@ -155,16 +155,17 @@
   async function loadData() {
     setLoading();
     try {
-      state.data = await requestFallbackDashboard();
+      state.data = await requestDashboard();
       renderFreshness();
       renderMetrics();
-      showNotice("当前使用 WiseETF 公开接口字段整理的本地快照；后端 Worker 部署后可切换为同口径实时聚合。");
+      hideNotice();
     } catch (error) {
       try {
-        state.data = await requestDashboard();
+        state.data = await requestFallbackDashboard();
         renderFreshness();
         renderMetrics();
-        showNotice("本地 WiseETF 字段快照未读取成功，当前回退到站点 ETF API。");
+        const reason = error?.name === "AbortError" ? "ETF API 请求超时" : "ETF API 暂时不可用";
+        showNotice(`${reason}，当前使用 WiseETF 公开接口字段整理的本地快照。`);
       } catch (fallbackError) {
         state.data = null;
         renderUnavailable(error || fallbackError);
