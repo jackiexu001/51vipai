@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 15;
+const UNIVERSE_VERSION = 16;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -687,6 +687,44 @@ async function fetchQdiiRankRows() {
   });
 }
 
+function normalizePurchaseStatus(value) {
+  if (/暂停/.test(value || "")) return "suspended";
+  if (/限/.test(value || "")) return "limited";
+  if (/开放|可申购/.test(value || "")) return "open";
+  return null;
+}
+
+function formatDailyLimit(value, statusText) {
+  const number = toNumber(value);
+  if (number === null) return null;
+  if (number >= 99999999999) return "无限额";
+  if (number <= 0) return /限/.test(statusText || "") ? "限额以平台为准" : "0元";
+  if (number >= 100000000) return `${Number((number / 100000000).toFixed(2))}亿元`;
+  if (number >= 10000) return `${Number((number / 10000).toFixed(2))}万元`;
+  return `${Number(number.toFixed(2))}元`;
+}
+
+async function fetchPurchaseStatusMap() {
+  const text = await fetchText(
+    "https://fund.eastmoney.com/Data/Fund_JJJZ_Data.aspx?t=8&page=1,50000&js=reData&sort=fcode,asc",
+    { headers: { referer: "https://fund.eastmoney.com/Fund_sgzt_bzdm.html" } },
+  );
+  const match = text.match(/datas:(\[.*?\]),record:/s);
+  if (!match) throw new Error("Eastmoney purchase status data is missing datas array");
+  const rows = JSON.parse(match[1]);
+  return new Map(rows.map((fields) => {
+    const statusText = fields[5] || "";
+    return [
+      String(fields[0]),
+      {
+        purchaseStatus: normalizePurchaseStatus(statusText),
+        dailyLimit: formatDailyLimit(fields[9], statusText),
+        purchaseStatusText: statusText,
+      },
+    ];
+  }));
+}
+
 function qdiiCategory(name) {
   if (/纳斯达克|NASDAQ|Nasdaq|纳指/i.test(name)) return "nasdaq";
   if (/标普500|标普 500|S&P\s*500|SP500|500ETF联接|500指数/i.test(name)) return "sp500";
@@ -730,7 +768,7 @@ async function enrichQdiiFund(row) {
   });
 }
 
-async function buildIndexQdiiFund(fund) {
+async function buildIndexQdiiFund(fund, purchaseInfo = {}) {
   let detail = {};
   try {
     detail = await fetchFundDetailWithRetry(fund.code);
@@ -748,8 +786,8 @@ async function buildIndexQdiiFund(fund) {
     turnoverCny100m: null,
     trackingErrorPct: null,
     feeRatePct: fund.feeRatePct,
-    dailyLimit: null,
-    purchaseStatus: null,
+    dailyLimit: purchaseInfo.dailyLimit ?? null,
+    purchaseStatus: purchaseInfo.purchaseStatus ?? null,
     _category: fund.category,
   });
 }
@@ -775,14 +813,23 @@ async function discoverIndexQdiiFunds() {
 }
 
 async function buildQdiiDatasets() {
-  const [rankRows, indexFunds] = await Promise.all([fetchQdiiRankRows(), discoverIndexQdiiFunds()]);
-  const rankedByCode = new Map(rankRows.map((row) => [row.code, row]));
-  const dedupedIndexFunds = uniqueByCode(indexFunds);
+  const [rankRows, indexFunds, purchaseStatusResult] = await Promise.allSettled([
+    fetchQdiiRankRows(),
+    discoverIndexQdiiFunds(),
+    fetchPurchaseStatusMap(),
+  ]);
+  if (rankRows.status === "rejected") throw rankRows.reason;
+  if (indexFunds.status === "rejected") throw indexFunds.reason;
+  const purchaseStatusMap = purchaseStatusResult.status === "fulfilled" ? purchaseStatusResult.value : new Map();
+  const rankData = rankRows.value;
+  const indexData = indexFunds.value;
+  const rankedByCode = new Map(rankData.map((row) => [row.code, row]));
+  const dedupedIndexFunds = uniqueByCode(indexData);
   const indexSelection = [
     ...dedupedIndexFunds.filter((fund) => fund.category === "sp500").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
     ...dedupedIndexFunds.filter((fund) => fund.category === "nasdaq").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
   ];
-  const activeSelection = uniqueByCode(rankRows.filter((row) => isLikelyActiveUsQdii(row.name))).slice(0, ACTIVE_QDII_LIMIT);
+  const activeSelection = uniqueByCode(rankData.filter((row) => isLikelyActiveUsQdii(row.name))).slice(0, ACTIVE_QDII_LIMIT);
   const enriched = await mapInChunks([
     ...indexSelection.map((fund) => ({
       type: "index",
@@ -796,8 +843,9 @@ async function buildQdiiDatasets() {
       fund,
     })),
   ], 4, (item) => {
-    if (item.type === "index") return buildIndexQdiiFund(item.fund);
+    if (item.type === "index") return buildIndexQdiiFund(item.fund, purchaseStatusMap.get(item.fund.code));
     const fund = item.fund;
+    const purchaseInfo = purchaseStatusMap.get(fund.code) || {};
     return Promise.resolve({
       code: fund.code,
       name: fund.name,
@@ -809,8 +857,8 @@ async function buildQdiiDatasets() {
       turnoverCny100m: null,
       trackingErrorPct: null,
       feeRatePct: fund.feeRatePct,
-      dailyLimit: null,
-      purchaseStatus: null,
+      dailyLimit: purchaseInfo.dailyLimit ?? null,
+      purchaseStatus: purchaseInfo.purchaseStatus ?? null,
       _category: "active",
     });
   });
