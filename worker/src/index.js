@@ -187,7 +187,10 @@ async function fetchEastmoneyQuote(fund) {
 async function buildOnExchangeFunds() {
   const rows = await Promise.allSettled(
     ON_EXCHANGE_FUNDS.map(async (fund) => {
-      const [quote, detail] = await Promise.all([fetchEastmoneyQuote(fund), fetchFundDetail(fund.code)]);
+      const [quoteResult, detailResult] = await Promise.allSettled([fetchEastmoneyQuote(fund), fetchFundDetail(fund.code)]);
+      const quote = quoteResult.status === "fulfilled" ? quoteResult.value : {};
+      const detail = detailResult.status === "fulfilled" ? detailResult.value : {};
+      if (!quote.name && !detail.name) throw new Error(`No listed ETF data for ${fund.code}`);
       const premiumPct = quote.price && detail.nav ? ((quote.price - detail.nav) / detail.nav) * 100 : null;
       return compactObject({
         code: fund.code,
