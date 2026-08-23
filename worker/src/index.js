@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 14;
+const UNIVERSE_VERSION = 15;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -779,8 +779,8 @@ async function buildQdiiDatasets() {
   const rankedByCode = new Map(rankRows.map((row) => [row.code, row]));
   const dedupedIndexFunds = uniqueByCode(indexFunds);
   const indexSelection = [
-    ...dedupedIndexFunds.filter((fund) => fund.category === "nasdaq").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
     ...dedupedIndexFunds.filter((fund) => fund.category === "sp500").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
+    ...dedupedIndexFunds.filter((fund) => fund.category === "nasdaq").slice(0, INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY),
   ];
   const activeSelection = uniqueByCode(rankRows.filter((row) => isLikelyActiveUsQdii(row.name))).slice(0, ACTIVE_QDII_LIMIT);
   const enriched = await mapInChunks([
