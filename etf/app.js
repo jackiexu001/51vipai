@@ -8,6 +8,7 @@
     { id: "nasdaq", label: "场外纳指", title: "纳斯达克指数基金" },
     { id: "sp500", label: "场外标普", title: "标普 500 指数基金" },
     { id: "active", label: "美股主动", title: "主动型美股 QDII" },
+    { id: "lazy", label: "懒人组合", title: "经典懒人组合回测与资产配置" },
     { id: "watchlist", label: "我的自选", title: "我的自选基金" },
   ];
 
@@ -94,6 +95,7 @@
 
   const state = {
     data: null,
+    lazy: [],
     view: "guide",
     query: "",
     status: "all",
@@ -142,6 +144,14 @@
     return data;
   }
 
+  async function requestLazyPortfolios() {
+    const response = await fetch("lazy-portfolios.json", { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(`lazy HTTP ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("lazy-portfolios 必须是数组");
+    return data;
+  }
+
   function validateDashboard(data) {
     if (!data || typeof data !== "object") throw new Error("响应不是对象");
     if (!data.meta?.source || !data.meta?.asOf) throw new Error("缺少 source 或 asOf 元数据");
@@ -155,13 +165,17 @@
   async function loadData() {
     setLoading();
     try {
-      state.data = await requestDashboard();
+      const [dashboard, lazy] = await Promise.all([requestDashboard(), requestLazyPortfolios()]);
+      state.data = dashboard;
+      state.lazy = lazy;
       renderFreshness();
       renderMetrics();
       hideNotice();
     } catch (error) {
       try {
-        state.data = await requestFallbackDashboard();
+        const [dashboard, lazy] = await Promise.all([requestFallbackDashboard(), requestLazyPortfolios().catch(() => [])]);
+        state.data = dashboard;
+        state.lazy = lazy;
         renderFreshness();
         renderMetrics();
         const reason = error?.name === "AbortError" ? "ETF API 请求超时" : "ETF API 暂时不可用";
@@ -233,7 +247,7 @@
   }
 
   function currentRows() {
-    if (state.view === "guide") return [];
+    if (state.view === "guide" || state.view === "lazy") return [];
     let rows = state.view === "watchlist"
       ? allFunds().filter((row) => state.favorites.has(row.code))
       : [...(state.data?.datasets?.[state.view] || [])];
@@ -286,13 +300,13 @@
   function renderTable() {
     renderTabs();
     const view = views.find((item) => item.id === state.view);
-    const isGuide = state.view === "guide";
-    elements.guidePanel.hidden = !isGuide;
-    elements.toolbar.hidden = isGuide;
-    elements.tableSummary.hidden = isGuide;
-    elements.tableWrap.hidden = isGuide;
-    if (isGuide) {
-      elements.guidePanel.innerHTML = renderGuidePanel();
+    const isPanel = state.view === "guide" || state.view === "lazy";
+    elements.guidePanel.hidden = !isPanel;
+    elements.toolbar.hidden = isPanel;
+    elements.tableSummary.hidden = isPanel;
+    elements.tableWrap.hidden = isPanel;
+    if (isPanel) {
+      elements.guidePanel.innerHTML = state.view === "lazy" ? renderLazyPanel() : renderGuidePanel();
       elements.exportButton.disabled = true;
       renderCompareTray();
       return;
@@ -320,6 +334,147 @@
     elements.empty.hidden = rows.length > 0;
     document.querySelector(".fund-table").hidden = rows.length === 0;
     renderCompareTray();
+  }
+
+  function lazyGrowth(returns) {
+    let value = 100;
+    return returns.map((item, index) => {
+      value *= 1 + item / 100;
+      return { year: 2017 + index, value: Math.round(value * 10) / 10, return: item };
+    });
+  }
+
+  function renderMiniLine(portfolio) {
+    const points = lazyGrowth(portfolio.returns);
+    const values = points.map((point) => point.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const width = 260;
+    const height = 70;
+    const path = points.map((point, index) => {
+      const x = (index / (points.length - 1)) * width;
+      const y = height - ((point.value - min) / (max - min || 1)) * height;
+      return `${index ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(" ");
+    return `<svg viewBox="0 0 ${width} ${height}" class="lazy-mini-line" aria-hidden="true"><path d="${path}" style="stroke:${escapeHtml(portfolio.color)}"></path></svg>`;
+  }
+
+  function renderAllocationBars(portfolio) {
+    return portfolio.allocs.map(([ticker, weight], index) => `
+      <div class="lazy-allocation-row">
+        <span class="lazy-dot" style="background:${escapeHtml(lazyColors[index % lazyColors.length])}"></span>
+        <b>${escapeHtml(ticker)}</b>
+        <em>${escapeHtml(portfolio.allocLabels?.[ticker] || ticker)}</em>
+        <i><span style="width:${Number(weight) * 2}%"></span></i>
+        <strong>${escapeHtml(weight)}%</strong>
+      </div>`).join("");
+  }
+
+  const lazyColors = ["#6366f1", "#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#a855f7", "#06b6d4", "#f97316", "#84cc16", "#0284c7", "#e11d48"];
+
+  function renderLazyPanel() {
+    const portfolios = [...state.lazy];
+    if (!portfolios.length) return '<section class="lazy-panel"><div class="empty-state"><strong>懒人组合数据未读取成功</strong><p>请确认 lazy-portfolios.json 已部署。</p></div></section>';
+    const best = [...portfolios].sort((a, b) => b.cagr - a.cagr)[0];
+    const safest = [...portfolios].sort((a, b) => b.maxDrawdown - a.maxDrawdown)[0];
+    const sharpe = [...portfolios].sort((a, b) => b.sharpe - a.sharpe)[0];
+    const selected = portfolios.slice(0, 8);
+    const years = Array.from({ length: 9 }, (_, index) => 2017 + index);
+    return `
+      <section class="lazy-panel">
+        <div class="lazy-hero">
+          <p class="eyebrow">LAZY PORTFOLIOS</p>
+          <h2>懒人组合：15 个经典资产配置回测</h2>
+          <p>复刻 WiseETF 的懒人组合模块：用 VTI、SPY、BND、TLT、GLD、VNQ、VXUS 等 ETF 组合，比较 2017—2025 年美元口径、年度再平衡后的收益、回撤、夏普与资产配置。</p>
+          <div class="lazy-stats">
+            <article><span>最高年化</span><b>${escapeHtml(best.name)}</b><strong>${best.cagr}%</strong></article>
+            <article><span>最小回撤</span><b>${escapeHtml(safest.name)}</b><strong>${safest.maxDrawdown}%</strong></article>
+            <article><span>最高夏普</span><b>${escapeHtml(sharpe.name)}</b><strong>${sharpe.sharpe}</strong></article>
+          </div>
+        </div>
+
+        <div class="lazy-card-grid">
+          ${portfolios.map((portfolio) => `
+            <article class="lazy-card" data-lazy-detail="${portfolio.id}" style="--lazy-color:${escapeHtml(portfolio.color)}">
+              <div class="lazy-card-top"></div>
+              <div class="lazy-card-head"><span>${portfolio.id}</span><div><h3>${escapeHtml(portfolio.name)}</h3><p>${escapeHtml(portfolio.nameEn)}</p></div></div>
+              <small>by ${escapeHtml(portfolio.author)}</small>
+              <p>${escapeHtml(portfolio.description)}</p>
+              <div class="lazy-kpis">
+                <div><b class="positive">${portfolio.cagr}%</b><span>年化收益</span></div>
+                <div><b class="negative">${portfolio.maxDrawdown}%</b><span>最大回撤</span></div>
+                <div><b>${portfolio.sharpe}</b><span>夏普</span></div>
+              </div>
+              ${renderMiniLine(portfolio)}
+              <div class="lazy-tags">${portfolio.allocs.map(([ticker, weight]) => `<span>${escapeHtml(ticker)} ${escapeHtml(weight)}%</span>`).join("")}</div>
+              <button type="button">查看完整分析 →</button>
+            </article>`).join("")}
+        </div>
+
+        <div class="lazy-section">
+          <div class="lazy-section-head"><h3>组合增长曲线对比</h3><p>初始 $100，年度再平衡。下图展示前 8 个组合的累计增长轨迹。</p></div>
+          <div class="lazy-growth-chart">
+            <svg viewBox="0 0 900 360" role="img" aria-label="组合增长曲线">
+              ${[0, 1, 2, 3, 4].map((i) => `<line x1="52" x2="880" y1="${40 + i * 68}" y2="${40 + i * 68}"></line>`).join("")}
+              ${selected.map((portfolio) => {
+                const points = lazyGrowth(portfolio.returns);
+                const allValues = selected.flatMap((item) => lazyGrowth(item.returns).map((point) => point.value));
+                const min = Math.min(...allValues);
+                const max = Math.max(...allValues);
+                const path = points.map((point, index) => {
+                  const x = 52 + (index / (points.length - 1)) * 828;
+                  const y = 320 - ((point.value - min) / (max - min || 1)) * 280;
+                  return `${index ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
+                }).join(" ");
+                return `<path d="${path}" style="stroke:${escapeHtml(portfolio.color)}"></path>`;
+              }).join("")}
+              ${years.map((year, index) => `<text x="${52 + (index / (years.length - 1)) * 828}" y="350">${year}</text>`).join("")}
+            </svg>
+            <div class="lazy-legend">${selected.map((portfolio) => `<button type="button" data-lazy-detail="${portfolio.id}"><i style="background:${escapeHtml(portfolio.color)}"></i>${escapeHtml(portfolio.name)}</button>`).join("")}</div>
+          </div>
+        </div>
+
+        <div class="lazy-section">
+          <div class="lazy-section-head"><h3>指标排序表</h3><p>点击任意行查看组合详情。表格包含 WiseETF 同款核心指标。</p></div>
+          <div class="lazy-table-wrap"><table class="lazy-table"><thead><tr><th>组合名称</th><th>年化收益</th><th>最大回撤</th><th>夏普</th><th>Sortino</th><th>波动率</th><th>Beta</th><th>Alpha</th></tr></thead><tbody>
+            ${[...portfolios].sort((a, b) => b.cagr - a.cagr).map((portfolio) => `<tr data-lazy-detail="${portfolio.id}"><td><i style="background:${escapeHtml(portfolio.color)}"></i><b>${escapeHtml(portfolio.name)}</b><small>${escapeHtml(portfolio.author)}</small></td><td class="positive">${portfolio.cagr}%</td><td class="negative">${portfolio.maxDrawdown}%</td><td>${portfolio.sharpe}</td><td>${portfolio.sortino}</td><td>${portfolio.volatility}%</td><td>${portfolio.beta}</td><td>${portfolio.alpha}</td></tr>`).join("")}
+          </tbody></table></div>
+        </div>
+
+        <div class="lazy-detail-panel" id="lazy-detail-panel">
+          ${renderLazyDetail(portfolios[0])}
+        </div>
+
+        <p class="source-note lazy-source">数据来源：Portfolio Visualizer / lazyportfolioetf.com · 回测区间：2017–2025 · 口径：美元 · 年度再平衡。仅供信息参考，不构成投资建议。</p>
+      </section>`;
+  }
+
+  function renderLazyDetail(portfolio) {
+    const growth = lazyGrowth(portfolio.returns);
+    const finalValue = growth[growth.length - 1].value;
+    const bestYear = Math.max(...portfolio.returns);
+    const worstYear = Math.min(...portfolio.returns);
+    return `
+      <article class="lazy-detail" style="--lazy-color:${escapeHtml(portfolio.color)}">
+        <div class="lazy-detail-head">
+          <div><span>LAZY PORTFOLIO #${portfolio.id}</span><h3>${escapeHtml(portfolio.name)}</h3><p>${escapeHtml(portfolio.nameEn)} · by ${escapeHtml(portfolio.author)}</p></div>
+          <div class="lazy-detail-kpis"><b>${portfolio.cagr}%<small>年化</small></b><b>${portfolio.maxDrawdown}%<small>最大回撤</small></b><b>$${finalValue}<small>$100 终值</small></b></div>
+        </div>
+        <div class="lazy-detail-grid">
+          <div class="lazy-story">
+            <h4>策略详解</h4>
+            ${portfolio.longDescription.map((item) => `<p>${escapeHtml(item)}</p>`).join("")}
+            <div class="lazy-chip-row"><span>正收益年份 ${portfolio.returns.filter((item) => item > 0).length}/9</span><span>最佳年份 +${bestYear.toFixed(2)}%</span><span>最差年份 ${worstYear.toFixed(2)}%</span></div>
+          </div>
+          <div class="lazy-alloc">
+            <h4>资产配置</h4>
+            ${renderAllocationBars(portfolio)}
+          </div>
+        </div>
+        <div class="lazy-year-grid">
+          ${growth.map((point) => `<div><span>${point.year}</span><b class="${point.return >= 0 ? "positive" : "negative"}">${point.return > 0 ? "+" : ""}${point.return.toFixed(2)}%</b><small>$${point.value}</small></div>`).join("")}
+        </div>
+      </article>`;
   }
 
   function holdingRows(items) {
@@ -509,6 +664,16 @@
     elements.search.value = ""; elements.status.value = "all"; renderTable();
   });
   elements.guidePanel.addEventListener("click", (event) => {
+    const lazyTrigger = event.target.closest("[data-lazy-detail]");
+    if (lazyTrigger) {
+      const portfolio = state.lazy.find((item) => String(item.id) === String(lazyTrigger.dataset.lazyDetail));
+      const panel = document.querySelector("#lazy-detail-panel");
+      if (portfolio && panel) {
+        panel.innerHTML = renderLazyDetail(portfolio);
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      return;
+    }
     const link = event.target.closest("[data-view-link]");
     if (!link) return;
     event.preventDefault();
