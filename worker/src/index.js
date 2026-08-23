@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 10;
+const UNIVERSE_VERSION = 11;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -586,8 +586,8 @@ async function discoverOnExchangeFunds() {
 async function buildOnExchangeFunds() {
   const funds = await discoverOnExchangeFunds();
   let quoteBatch = await fetchQuoteMap(funds);
+  const quoteCandidates = uniqueByCode([...FALLBACK_ON_EXCHANGE_FUNDS, ...funds]).slice(0, 24);
   if (!quoteBatch.size) {
-    const quoteCandidates = uniqueByCode([...FALLBACK_ON_EXCHANGE_FUNDS, ...funds]).slice(0, 24);
     quoteBatch = await fetchIndividualQuoteMap(quoteCandidates);
   }
   const sortedFunds = [...funds].sort((a, b) => {
@@ -623,9 +623,24 @@ async function buildOnExchangeFunds() {
       });
     }),
   );
-  return rows
+  const builtRows = rows
     .flatMap((result) => (result.status === "fulfilled" ? [result.value] : []))
     .sort((a, b) => compareNumberDesc(a.turnoverCny100m, b.turnoverCny100m));
+  if (builtRows.length && !builtRows.some((row) => row.quoteSource)) {
+    const repairQuotes = await fetchIndividualQuoteMap(quoteCandidates);
+    return builtRows.map((row) => {
+      const quote = repairQuotes.get(row.code);
+      if (!quote) return row;
+      return {
+        ...row,
+        marketChangePct: quote.marketChangePct,
+        premiumPct: row.premiumPct,
+        turnoverCny100m: quote.turnoverCny100m,
+        quoteSource: quote.quoteSource,
+      };
+    }).sort((a, b) => compareNumberDesc(a.turnoverCny100m, b.turnoverCny100m));
+  }
+  return builtRows;
 }
 
 async function fetchQdiiRankRows() {
