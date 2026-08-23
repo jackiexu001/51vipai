@@ -92,25 +92,48 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 
 .method-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 28px; }
 .method-grid article { padding: 22px; border-top: 3px solid var(--ink); background: var(--surface); }.method-grid article > span { color: var(--rust); font-family: var(--mono); font-size: 36px; }.method-grid h2 { margin: 12px 0 8px; font-family: var(--serif); font-size: 21px; }.method-grid p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.75; }
-.guide-section { margin-top: 34px; padding: 30px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); }
+.guide-tab-panel { padding: 24px; background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, white), var(--surface)); }
+.guide-section { padding: 8px; }
 .guide-head { display: grid; gap: 10px; max-width: 920px; margin-bottom: 22px; }
 .guide-head h2 { margin: 0; font-family: var(--serif); font-size: clamp(30px, 4vw, 48px); line-height: 1.18; }
 .guide-head p, .index-card p, .holdings-panel p, .ways-grid p, .account-guide li { color: var(--muted); font-size: 14px; line-height: 1.8; }
 .index-compare-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .index-card, .holdings-panel, .ways-grid article, .account-guide { border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 84%, var(--surface-2)); }
-.index-card { padding: 24px; }
+.index-card { padding: 24px; border-radius: 18px; }
+.lift-card, .route-card { transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.lift-card:hover, .route-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--blue) 35%, var(--line)); box-shadow: 0 20px 55px rgba(22,33,43,.12); }
 .index-tag { display: inline-flex; margin-bottom: 14px; padding: 6px 9px; background: var(--navy); color: #f7f1e6; font-family: var(--mono); font-size: 10px; font-weight: 900; letter-spacing: .12em; }
 .index-card h3, .holdings-panel h3, .ways-grid h3, .account-guide h3 { margin: 0 0 10px; font-family: var(--serif); font-size: 24px; }
 .index-card ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.85; }
-.holdings-panel { display: grid; grid-template-columns: minmax(260px, .9fr) 1.1fr; gap: 22px; margin-top: 16px; padding: 24px; }
+.holdings-panel { display: grid; grid-template-columns: minmax(260px, .75fr) 1.25fr; gap: 22px; margin-top: 16px; padding: 24px; border-radius: 18px; }
 .holding-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .holding-list > div { padding: 16px; border-left: 3px solid var(--rust); background: var(--surface); }
 .holding-list h4 { margin: 0 0 8px; font-size: 15px; }
+.holding-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.holding-columns article { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.holding-columns h4 { margin: 0 0 13px; font-size: 15px; }
+.holding-row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(70px, .7fr) 58px; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px dashed color-mix(in srgb, var(--line) 70%, transparent); }
+.holding-row:first-of-type { border-top: 0; }
+.holding-row b, .holding-row span { display: block; }
+.holding-row b { font-size: 12px; }
+.holding-row span { margin-top: 2px; color: var(--muted); font-family: var(--mono); font-size: 10px; }
+.holding-row strong { text-align: right; font-family: var(--mono); font-size: 12px; color: var(--rust); }
+.holding-bar { height: 8px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--line) 50%, transparent); }
+.holding-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--gold)); }
 .source-note { grid-column: 1 / -1; margin: 0; font-size: 12px !important; }
+.ways-intro { margin: 22px 0 12px; max-width: 760px; }
+.ways-intro h3 { margin: 0 0 8px; font-family: var(--serif); font-size: 28px; }
+.ways-intro p:last-child { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.8; }
 .ways-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
-.ways-grid article { padding: 22px; border-top: 3px solid var(--gold); }
+.ways-grid article { padding: 22px; border-top: 3px solid var(--gold); border-radius: 18px; position: relative; overflow: hidden; }
+.ways-grid article::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: linear-gradient(90deg, var(--rust), var(--gold), var(--blue)); opacity: .65; }
+.ways-grid article.featured { background: linear-gradient(145deg, color-mix(in srgb, var(--navy) 9%, var(--surface)), color-mix(in srgb, var(--gold) 13%, var(--surface))); }
 .ways-grid article > span { color: var(--rust); font-family: var(--mono); font-size: 12px; font-weight: 900; letter-spacing: .12em; }
+.ways-grid ul { margin: 14px 0 18px; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.ways-grid a { display: inline-flex; align-items: center; min-height: 34px; padding: 0 12px; border-radius: 999px; background: var(--ink); color: var(--surface); font-size: 12px; font-weight: 900; }
 .account-guide { display: grid; grid-template-columns: 270px 1fr; gap: 18px; margin-top: 16px; padding: 24px; }
+.account-guide { border-radius: 18px; background: radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--gold) 18%, transparent), transparent 32%), color-mix(in srgb, var(--surface) 88%, var(--surface-2)); }
+.account-guide p { color: var(--muted); font-size: 14px; line-height: 1.8; }
 .account-guide ol { margin: 0; padding-left: 22px; }
 .account-guide li + li { margin-top: 8px; }
 .compare-tray { position: fixed; z-index: 20; left: 50%; bottom: 18px; transform: translateX(-50%); width: min(900px, calc(100% - 32px)); display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 14px; padding: 13px 15px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 16px 60px rgba(0,0,0,.22); }.compare-tray > div:first-child b, .compare-tray > div:first-child span { display:block; }.compare-tray span { color:var(--muted); font-size:11px; }.compare-items { display:flex; gap:7px; overflow-x:auto; }.compare-chip { padding:6px 9px; background:var(--surface-2); font-size:11px; white-space:nowrap; }
