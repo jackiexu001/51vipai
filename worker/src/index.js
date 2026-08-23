@@ -388,8 +388,22 @@ async function dashboard(env) {
        ORDER BY as_of DESC
        LIMIT 1`,
     ).first();
-  } catch {
-    return errorResponse(503, "DATABASE_NOT_READY", "ETF database is not initialized.");
+  } catch (error) {
+    try {
+      const liveSnapshot = await buildDashboardSnapshot();
+      return json(liveSnapshot, {
+        headers: {
+          "cache-control": "public, max-age=60",
+          "x-etf-as-of": liveSnapshot.meta.asOf,
+          "x-etf-storage": "live-fallback",
+        },
+      });
+    } catch (liveError) {
+      return errorResponse(503, "DATABASE_NOT_READY", "ETF database is not initialized.", {
+        reason: error.message,
+        liveFallback: liveError.message,
+      });
+    }
   }
 
   if (!row) {
