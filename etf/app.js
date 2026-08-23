@@ -8,7 +8,6 @@
     { id: "nasdaq", label: "场外纳指", title: "纳斯达克指数基金" },
     { id: "sp500", label: "场外标普", title: "标普 500 指数基金" },
     { id: "active", label: "美股主动", title: "主动型美股 QDII" },
-    { id: "lazy", label: "懒人组合", title: "经典懒人组合回测与资产配置" },
     { id: "watchlist", label: "我的自选", title: "我的自选基金" },
   ];
 
@@ -247,7 +246,7 @@
   }
 
   function currentRows() {
-    if (state.view === "guide" || state.view === "lazy") return [];
+    if (state.view === "guide") return [];
     let rows = state.view === "watchlist"
       ? allFunds().filter((row) => state.favorites.has(row.code))
       : [...(state.data?.datasets?.[state.view] || [])];
@@ -300,13 +299,13 @@
   function renderTable() {
     renderTabs();
     const view = views.find((item) => item.id === state.view);
-    const isPanel = state.view === "guide" || state.view === "lazy";
+    const isPanel = state.view === "guide";
     elements.guidePanel.hidden = !isPanel;
     elements.toolbar.hidden = isPanel;
     elements.tableSummary.hidden = isPanel;
     elements.tableWrap.hidden = isPanel;
     if (isPanel) {
-      elements.guidePanel.innerHTML = state.view === "lazy" ? renderLazyPanel() : renderGuidePanel();
+      elements.guidePanel.innerHTML = renderGuidePanel();
       elements.exportButton.disabled = true;
       renderCompareTray();
       return;

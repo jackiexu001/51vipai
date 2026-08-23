@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>懒人组合 | 51VIPAI</title>
+    <meta name="description" content="15 个经典资产懒人组合：资产配置、回测收益、最大回撤、夏普比率与逐年收益。" />
+    <link rel="canonical" href="https://www.51vipai.com/lazy/" />
+    <link rel="stylesheet" href="lazy.css?v=20260823" />
+  </head>
+  <body>
+    <header class="lazy-top">
+      <nav>
+        <a class="brand" href="../index.html"><span>51VIPAI</span><small>LAZY PORTFOLIOS</small></a>
+        <div>
+          <a href="../etf/">ETF</a>
+          <a class="active" href="./">懒人组合</a>
+        </div>
+      </nav>
+      <section class="hero">
+        <p>LAZY PORTFOLIOS · 2017—2025</p>
+        <h1>15 个经典资产懒人组合</h1>
+        <p>复刻 WiseETF /lazy 的核心体验：用卡片、排序表和增长曲线比较长期资产配置方案。点击任意组合进入独立详情页。</p>
+      </section>
+    </header>
+
+    <main class="shell">
+      <section class="summary-grid" id="summary-grid"></section>
+      <section class="card-grid" id="portfolio-grid"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p>COMPARE</p>
+            <h2>组合增长曲线对比</h2>
+          </div>
+          <small>初始 $100 · 年度再平衡</small>
+        </div>
+        <div id="growth-chart" class="growth-chart"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p>RANKING</p>
+            <h2>指标排序表</h2>
+          </div>
+          <small>点击行进入详情页</small>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>组合名称</th><th>年化收益</th><th>最大回撤</th><th>夏普</th><th>Sortino</th><th>波动率</th><th>Beta</th><th>Alpha</th></tr></thead>
+            <tbody id="ranking-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="source">数据来源：Portfolio Visualizer / lazyportfolioetf.com · 回测区间：2017–2025 · 口径：美元 · 年度再平衡。仅供信息参考，不构成投资建议。</p>
+    </main>
+
+    <script src="lazy.js?v=20260823"></script>
+  </body>
+</html>
