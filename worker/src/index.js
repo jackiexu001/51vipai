@@ -995,11 +995,6 @@ function validateSnapshot(snapshot) {
 }
 
 async function buildDashboardSnapshot() {
-  try {
-    return await buildWiseDashboardSnapshot();
-  } catch (error) {
-    console.error("WiseETF dashboard source failed, falling back to legacy sources", error);
-  }
   const generatedAt = new Date().toISOString();
   const onExchange = await buildOnExchangeFunds();
   const [metrics, qdii] = await Promise.all([
@@ -1011,8 +1006,16 @@ async function buildDashboardSnapshot() {
       source: SOURCE_LABEL,
       asOf: generatedAt,
       generatedAt,
-      version: 1,
+      version: 3,
       universeVersion: UNIVERSE_VERSION,
+      sourceUrls: [
+        "https://fund.eastmoney.com/",
+        "https://fundsuggest.eastmoney.com/",
+        "https://push2.eastmoney.com/",
+        "https://qt.gtimg.cn/",
+        "https://hq.sinajs.cn/",
+        "https://query1.finance.yahoo.com/",
+      ],
     },
     metrics,
     datasets: {

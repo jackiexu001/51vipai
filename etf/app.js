@@ -179,7 +179,7 @@
         renderFreshness();
         renderMetrics();
         const reason = error?.name === "AbortError" ? "ETF API 请求超时" : "ETF API 暂时不可用";
-        showNotice(`${reason}，当前使用 WiseETF 公开接口字段整理的本地快照。`);
+        showNotice(`${reason}，当前使用源头公开数据生成的本地快照。`);
       } catch (fallbackError) {
         state.data = null;
         renderUnavailable(error || fallbackError);
