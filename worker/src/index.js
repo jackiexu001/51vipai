@@ -34,7 +34,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 5;
+const UNIVERSE_VERSION = 6;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -527,13 +527,18 @@ async function fetchSinaQuoteBatchChunked(funds) {
 }
 
 async function fetchIndividualQuoteMap(funds) {
-  const settled = await Promise.allSettled(funds.map(fetchTencentQuote));
-  const rows = settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  const rows = [];
+  for (const group of chunks(funds, 6)) {
+    const settled = await Promise.allSettled(group.map(fetchTencentQuote));
+    rows.push(...settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : [])));
+  }
   if (rows.length) return new Map(rows.map((row) => [row.code, row]));
-  const sinaSettled = await Promise.allSettled(funds.map(fetchSinaQuote));
-  return new Map(sinaSettled
-    .flatMap((result) => (result.status === "fulfilled" ? [result.value] : []))
-    .map((row) => [row.code, row]));
+  const sinaRows = [];
+  for (const group of chunks(funds, 6)) {
+    const settled = await Promise.allSettled(group.map(fetchSinaQuote));
+    sinaRows.push(...settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : [])));
+  }
+  return new Map(sinaRows.map((row) => [row.code, row]));
 }
 
 async function fetchFallbackQuote(fund) {
