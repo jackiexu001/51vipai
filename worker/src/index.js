@@ -23,18 +23,18 @@ const FALLBACK_ON_EXCHANGE_FUNDS = [
 ];
 
 const FALLBACK_INDEX_QDII_FUNDS = [
-  { code: "040046", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
-  { code: "270042", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
-  { code: "000834", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
-  { code: "015299", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
-  { code: "018966", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
-  { code: "050025", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
-  { code: "161125", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
-  { code: "007721", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
+  { code: "040046", name: "华安纳斯达克100ETF联接(QDII)A", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
+  { code: "270042", name: "广发纳斯达克100ETF联接人民币(QDII)A", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
+  { code: "000834", name: "大成纳斯达克100ETF联接(QDII)A", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
+  { code: "015299", name: "华夏纳斯达克100ETF发起式联接(QDII)A", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
+  { code: "018966", name: "汇添富纳斯达克100ETF发起式联接(QDII)人民币A", category: "nasdaq", trackingIndex: "纳斯达克100", feeRatePct: 0.8 },
+  { code: "050025", name: "博时标普500ETF联接A", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
+  { code: "161125", name: "易方达标普500指数人民币A", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
+  { code: "007721", name: "天弘标普500发起(QDII-FOF)A", category: "sp500", trackingIndex: "标普500", feeRatePct: 0.8 },
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const UNIVERSE_VERSION = 12;
+const UNIVERSE_VERSION = 13;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
 const ACTIVE_QDII_LIMIT = 36;
@@ -710,10 +710,15 @@ async function enrichQdiiFund(row) {
 }
 
 async function buildIndexQdiiFund(fund) {
-  const detail = await fetchFundDetail(fund.code);
+  let detail = {};
+  try {
+    detail = await fetchFundDetail(fund.code);
+  } catch {
+    detail = {};
+  }
   return compactObject({
     code: fund.code,
-    name: detail.name || fund.code,
+    name: detail.name || fund.name || fund.code,
     trackingIndex: fund.trackingIndex,
     scaleCny100m: detail.scaleCny100m,
     return1yPct: detail.return1yPct,
