@@ -25,11 +25,11 @@
     const values = points.map((point) => point.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const path = points.map((point, index) => {
+    const path = smoothPath(points.map((point, index) => {
       const x = (index / (points.length - 1)) * 260;
       const y = 72 - ((point.value - min) / (max - min || 1)) * 70;
-      return `${index ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(" ");
+      return [x, y];
+    }));
     return `<svg viewBox="0 0 260 74" class="mini"><path d="${path}" style="stroke:${esc(portfolio.color)}"></path></svg>`;
   }
 
@@ -68,11 +68,11 @@
     const min = Math.min(...allValues);
     const max = Math.max(...allValues);
     const paths = portfolios.map((portfolio) => {
-      const path = growth(portfolio.returns).map((point, index) => {
+      const path = smoothPath(growth(portfolio.returns).map((point, index) => {
         const x = 54 + (index / 8) * 820;
         const y = 320 - ((point.value - min) / (max - min || 1)) * 280;
-        return `${index ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join(" ");
+        return [x, y];
+      }));
       return `<path d="${path}" style="stroke:${esc(portfolio.color)}"></path>`;
     }).join("");
     document.querySelector("#growth-chart").innerHTML = `
@@ -92,17 +92,49 @@
       <header class="detail-hero" style="--c:${esc(portfolio.color)}">
         <nav><a href="../">← 返回懒人组合</a><a href="../../etf/">ETF</a></nav>
         <section><span>LAZY PORTFOLIO #${portfolio.id}</span><h1>${esc(portfolio.name)}</h1><p>${esc(portfolio.nameEn)} · by ${esc(portfolio.author)}</p>
-        <div class="hero-kpis"><b>${portfolio.cagr}%<small>年化收益</small></b><b>${portfolio.maxDrawdown}%<small>最大回撤</small></b><b>$${finalValue}<small>$100 终值</small></b><b>${portfolio.sharpe}<small>夏普</small></b></div></section>
+        <div class="hero-kpis"><b>${portfolio.cagr}%<small>年化收益</small></b><b>${portfolio.maxDrawdown}%<small>最大回撤</small></b><b>${portfolio.sharpe}<small>夏普比率</small></b><b>${portfolio.sortino}<small>索提诺比率</small></b><b>${portfolio.volatility}%<small>年化波动率</small></b><b>+${best.toFixed(1)}%<small>最佳年份</small></b><b>${worst.toFixed(1)}%<small>最差年份</small></b></div></section>
       </header>
       <main class="detail-shell">
         <section class="detail-grid">
           <article class="story"><h2>策略详解</h2>${portfolio.longDescription.map((item) => `<p>${esc(item)}</p>`).join("")}<div class="chips"><span>正收益年份 ${portfolio.returns.filter((item) => item > 0).length}/9</span><span>最佳年份 +${best.toFixed(2)}%</span><span>最差年份 ${worst.toFixed(2)}%</span></div></article>
-          <article class="alloc"><h2>资产配置</h2>${portfolio.allocs.map(([ticker, weight], index) => `<div><i style="background:${colors[index % colors.length]}"></i><b>${esc(ticker)}</b><em>${esc(portfolio.allocLabels[ticker] || ticker)}</em><span><u style="width:${weight * 2}%"></u></span><strong>${weight}%</strong></div>`).join("")}</article>
+          <article class="alloc"><h2>资产配置</h2>${donut(portfolio)}${portfolio.allocs.map(([ticker, weight], index) => `<div><i style="background:${colors[index % colors.length]}"></i><b>${esc(ticker)}</b><em>${esc(portfolio.allocLabels[ticker] || ticker)}</em><span><u style="width:${weight * 2}%"></u></span><strong>${weight}%</strong></div>`).join("")}</article>
         </section>
         <section class="panel"><div class="panel-head"><div><p>GROWTH</p><h2>累计净值增长</h2></div><small>初始 $100 → $${finalValue}</small></div>${detailLine(portfolio)}</section>
-        <section class="panel"><div class="panel-head"><div><p>RETURNS</p><h2>逐年回报明细</h2></div><small>2017—2025</small></div><div class="year-grid">${g.map((point) => `<div><span>${point.year}</span><b class="${point.return >= 0 ? "good" : "bad"}">${point.return > 0 ? "+" : ""}${point.return.toFixed(2)}%</b><small>$${point.value}</small></div>`).join("")}</div></section>
+        <section class="panel"><div class="panel-head"><div><p>RETURNS</p><h2>历年年度收益率</h2></div><small>绿色为正收益，红色为负收益</small></div>${barChart(portfolio)}</section>
+        <section class="panel"><div class="panel-head"><div><p>DETAILS</p><h2>逐年回报明细</h2></div><small>2017—2025</small></div><div class="return-table"><table><thead><tr><th>年份</th><th>年度收益率</th><th>累计净值</th><th>较上年变化</th></tr></thead><tbody>${g.map((point, index) => {
+          const prev = index === 0 ? 100 : g[index - 1].value;
+          const diff = point.value - prev;
+          return `<tr><td>${point.year}</td><td><span class="${point.return >= 0 ? "pill-good" : "pill-bad"}">${point.return > 0 ? "+" : ""}${point.return.toFixed(2)}%</span></td><td>$${point.value.toFixed(1)}</td><td class="${diff >= 0 ? "good" : "bad"}">${diff >= 0 ? "+" : ""}${diff.toFixed(1)}</td></tr>`;
+        }).join("")}</tbody></table></div></section>
         <p class="source">数据来源：Portfolio Visualizer / lazyportfolioetf.com · 回测区间：2017–2025 · 口径：美元 · 年度再平衡。历史回测不代表未来表现。</p>
       </main>`;
+  }
+
+  function smoothPath(points) {
+    if (!points.length) return "";
+    if (points.length === 1) return `M${points[0][0].toFixed(1)},${points[0][1].toFixed(1)}`;
+    let path = `M${points[0][0].toFixed(1)},${points[0][1].toFixed(1)}`;
+    for (let index = 0; index < points.length - 1; index += 1) {
+      const [x0, y0] = points[index];
+      const [x1, y1] = points[index + 1];
+      const dx = (x1 - x0) / 2;
+      path += ` C${(x0 + dx).toFixed(1)},${y0.toFixed(1)} ${(x1 - dx).toFixed(1)},${y1.toFixed(1)} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+    }
+    return path;
+  }
+
+  function donut(portfolio) {
+    const total = portfolio.allocs.reduce((sum, [, weight]) => sum + Number(weight), 0);
+    let offset = 0;
+    const radius = 42;
+    const circumference = 2 * Math.PI * radius;
+    const circles = portfolio.allocs.map(([, weight], index) => {
+      const length = Number(weight) / total * circumference;
+      const circle = `<circle r="${radius}" cx="60" cy="60" stroke="${colors[index % colors.length]}" stroke-width="20" stroke-dasharray="${length} ${circumference - length}" stroke-dashoffset="${-offset}" />`;
+      offset += length;
+      return circle;
+    }).join("");
+    return `<svg class="donut" viewBox="0 0 120 120" aria-label="资产配置环形图"><g transform="rotate(-90 60 60)">${circles}</g><circle r="24" cx="60" cy="60" fill="#fff"/></svg>`;
   }
 
   function detailLine(portfolio) {
@@ -110,12 +142,27 @@
     const values = points.map((point) => point.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const path = points.map((point, index) => {
+    const path = smoothPath(points.map((point, index) => {
       const x = 60 + (index / 8) * 800;
       const y = 300 - ((point.value - min) / (max - min || 1)) * 260;
-      return `${index ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(" ");
-    return `<svg class="detail-line" viewBox="0 0 900 330"><path d="${path}" style="stroke:${esc(portfolio.color)}"></path>${years.map((year, index) => `<text x="${60 + (index / 8) * 800}" y="320">${year}</text>`).join("")}</svg>`;
+      return [x, y];
+    }));
+    return `<svg class="detail-line" viewBox="0 0 900 330"><defs><pattern id="dotgrid" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#e8eef7"/></pattern></defs><rect width="900" height="330" fill="url(#dotgrid)"/><path d="${path}" style="stroke:${esc(portfolio.color)}"></path>${points.map((point, index) => {
+      const x = 60 + (index / 8) * 800;
+      const y = 300 - ((point.value - min) / (max - min || 1)) * 260;
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="${esc(portfolio.color)}"/>`;
+    }).join("")}${years.map((year, index) => `<text x="${60 + (index / 8) * 800}" y="320">${year}</text>`).join("")}</svg>`;
+  }
+
+  function barChart(portfolio) {
+    const maxAbs = Math.max(...portfolio.returns.map((item) => Math.abs(item)), 30);
+    return `<svg class="bar-chart" viewBox="0 0 900 320" aria-label="历年年度收益率"><defs><pattern id="bardots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#e8eef7"/></pattern></defs><rect width="900" height="320" fill="url(#bardots)"/><line x1="56" x2="870" y1="160" y2="160" />${portfolio.returns.map((ret, index) => {
+      const slot = 814 / portfolio.returns.length;
+      const x = 70 + index * slot;
+      const h = Math.abs(ret) / maxAbs * 125;
+      const y = ret >= 0 ? 160 - h : 160;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${Math.min(slot * .78, 76).toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="${ret >= 0 ? "#22c55e" : "#ef4444"}" opacity=".78"/><text x="${(x + slot * .39).toFixed(1)}" y="300">${years[index]}</text>`;
+    }).join("")}<text x="28" y="44">30%</text><text x="30" y="164">0%</text><text x="22" y="286">-30%</text></svg>`;
   }
 
   fetch(dataUrl)

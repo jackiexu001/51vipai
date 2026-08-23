@@ -8,6 +8,7 @@
     { id: "nasdaq", label: "场外纳指", title: "纳斯达克指数基金" },
     { id: "sp500", label: "场外标普", title: "标普 500 指数基金" },
     { id: "active", label: "美股主动", title: "主动型美股 QDII" },
+    { id: "lazy", label: "懒人组合", title: "经典懒人组合回测与资产配置" },
     { id: "watchlist", label: "我的自选", title: "我的自选基金" },
   ];
 
@@ -246,7 +247,7 @@
   }
 
   function currentRows() {
-    if (state.view === "guide") return [];
+    if (state.view === "guide" || state.view === "lazy") return [];
     let rows = state.view === "watchlist"
       ? allFunds().filter((row) => state.favorites.has(row.code))
       : [...(state.data?.datasets?.[state.view] || [])];
@@ -299,13 +300,13 @@
   function renderTable() {
     renderTabs();
     const view = views.find((item) => item.id === state.view);
-    const isPanel = state.view === "guide";
+    const isPanel = state.view === "guide" || state.view === "lazy";
     elements.guidePanel.hidden = !isPanel;
     elements.toolbar.hidden = isPanel;
     elements.tableSummary.hidden = isPanel;
     elements.tableWrap.hidden = isPanel;
     if (isPanel) {
-      elements.guidePanel.innerHTML = renderGuidePanel();
+      elements.guidePanel.innerHTML = state.view === "lazy" ? renderLazyPanel() : renderGuidePanel();
       elements.exportButton.disabled = true;
       renderCompareTray();
       return;
@@ -394,7 +395,7 @@
 
         <div class="lazy-card-grid">
           ${portfolios.map((portfolio) => `
-            <article class="lazy-card" data-lazy-detail="${portfolio.id}" style="--lazy-color:${escapeHtml(portfolio.color)}">
+            <a class="lazy-card" href="../lazy/portfolio/?id=${encodeURIComponent(portfolio.id)}" style="--lazy-color:${escapeHtml(portfolio.color)}">
               <div class="lazy-card-top"></div>
               <div class="lazy-card-head"><span>${portfolio.id}</span><div><h3>${escapeHtml(portfolio.name)}</h3><p>${escapeHtml(portfolio.nameEn)}</p></div></div>
               <small>by ${escapeHtml(portfolio.author)}</small>
@@ -407,7 +408,7 @@
               ${renderMiniLine(portfolio)}
               <div class="lazy-tags">${portfolio.allocs.map(([ticker, weight]) => `<span>${escapeHtml(ticker)} ${escapeHtml(weight)}%</span>`).join("")}</div>
               <button type="button">查看完整分析 →</button>
-            </article>`).join("")}
+            </a>`).join("")}
         </div>
 
         <div class="lazy-section">
@@ -429,19 +430,15 @@
               }).join("")}
               ${years.map((year, index) => `<text x="${52 + (index / (years.length - 1)) * 828}" y="350">${year}</text>`).join("")}
             </svg>
-            <div class="lazy-legend">${selected.map((portfolio) => `<button type="button" data-lazy-detail="${portfolio.id}"><i style="background:${escapeHtml(portfolio.color)}"></i>${escapeHtml(portfolio.name)}</button>`).join("")}</div>
+            <div class="lazy-legend">${selected.map((portfolio) => `<a href="../lazy/portfolio/?id=${encodeURIComponent(portfolio.id)}"><i style="background:${escapeHtml(portfolio.color)}"></i>${escapeHtml(portfolio.name)}</a>`).join("")}</div>
           </div>
         </div>
 
         <div class="lazy-section">
           <div class="lazy-section-head"><h3>指标排序表</h3><p>点击任意行查看组合详情。表格包含 WiseETF 同款核心指标。</p></div>
           <div class="lazy-table-wrap"><table class="lazy-table"><thead><tr><th>组合名称</th><th>年化收益</th><th>最大回撤</th><th>夏普</th><th>Sortino</th><th>波动率</th><th>Beta</th><th>Alpha</th></tr></thead><tbody>
-            ${[...portfolios].sort((a, b) => b.cagr - a.cagr).map((portfolio) => `<tr data-lazy-detail="${portfolio.id}"><td><i style="background:${escapeHtml(portfolio.color)}"></i><b>${escapeHtml(portfolio.name)}</b><small>${escapeHtml(portfolio.author)}</small></td><td class="positive">${portfolio.cagr}%</td><td class="negative">${portfolio.maxDrawdown}%</td><td>${portfolio.sharpe}</td><td>${portfolio.sortino}</td><td>${portfolio.volatility}%</td><td>${portfolio.beta}</td><td>${portfolio.alpha}</td></tr>`).join("")}
+            ${[...portfolios].sort((a, b) => b.cagr - a.cagr).map((portfolio) => `<tr onclick="location.href='../lazy/portfolio/?id=${encodeURIComponent(portfolio.id)}'"><td><i style="background:${escapeHtml(portfolio.color)}"></i><b>${escapeHtml(portfolio.name)}</b><small>${escapeHtml(portfolio.author)}</small></td><td class="positive">${portfolio.cagr}%</td><td class="negative">${portfolio.maxDrawdown}%</td><td>${portfolio.sharpe}</td><td>${portfolio.sortino}</td><td>${portfolio.volatility}%</td><td>${portfolio.beta}</td><td>${portfolio.alpha}</td></tr>`).join("")}
           </tbody></table></div>
-        </div>
-
-        <div class="lazy-detail-panel" id="lazy-detail-panel">
-          ${renderLazyDetail(portfolios[0])}
         </div>
 
         <p class="source-note lazy-source">数据来源：Portfolio Visualizer / lazyportfolioetf.com · 回测区间：2017–2025 · 口径：美元 · 年度再平衡。仅供信息参考，不构成投资建议。</p>
@@ -663,16 +660,6 @@
     elements.search.value = ""; elements.status.value = "all"; renderTable();
   });
   elements.guidePanel.addEventListener("click", (event) => {
-    const lazyTrigger = event.target.closest("[data-lazy-detail]");
-    if (lazyTrigger) {
-      const portfolio = state.lazy.find((item) => String(item.id) === String(lazyTrigger.dataset.lazyDetail));
-      const panel = document.querySelector("#lazy-detail-panel");
-      if (portfolio && panel) {
-        panel.innerHTML = renderLazyDetail(portfolio);
-        panel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      return;
-    }
     const link = event.target.closest("[data-view-link]");
     if (!link) return;
     event.preventDefault();
