@@ -1,0 +1,15 @@
+{
+  "name": "51vipai",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "check": "node --check worker/src/index.js && node --check etf/app.js && node --check etf/config.js",
+    "db:migrate:local": "wrangler d1 migrations apply 51vipai-etf --local",
+    "db:migrate:remote": "wrangler d1 migrations apply 51vipai-etf --remote",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.32.0"
+  }
+}

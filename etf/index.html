@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>ETF 与 QDII 研究 | 51VIPAI</title>
+    <meta name="description" content="51VIPAI ETF 研究页：对比场内 ETF、纳指与标普场外基金、主动 QDII 的费率、规模、收益、溢价和申购状态。" />
+    <link rel="canonical" href="https://www.51vipai.com/etf/" />
+    <link rel="stylesheet" href="styles.css?v=1" />
+  </head>
+  <body>
+    <a class="skip-link" href="#etf-content">跳到主要内容</a>
+    <header class="etf-header">
+      <nav class="etf-nav" aria-label="ETF 主导航">
+        <a class="etf-brand" href="../index.html" aria-label="返回 51VIPAI 首页">
+          <span>51VIPAI</span>
+          <small>ETF RESEARCH</small>
+        </a>
+        <div class="etf-nav-links">
+          <a href="../categories/us-stocks.html">美股</a>
+          <a href="../categories/ai.html">AI</a>
+          <a class="active" href="index.html" aria-current="page">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+
+      <section class="etf-hero">
+        <p class="hero-kicker">ETF / QDII · DATA WORKSPACE</p>
+        <div class="hero-heading">
+          <div>
+            <h1>ETF 与 QDII 研究台</h1>
+            <p>把行情、费率、溢价、规模与申购状态放在同一个可核验的数据界面里。</p>
+          </div>
+          <div class="freshness" id="freshness" aria-live="polite">
+            <span class="status-dot loading"></span>
+            <div><b>正在连接数据服务</b><small>等待 API 响应</small></div>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <main id="etf-content" class="etf-shell">
+      <section class="notice" id="data-notice" hidden role="status"></section>
+
+      <section class="metric-grid" id="metric-grid" aria-label="市场指标">
+        <div class="metric-card skeleton"></div><div class="metric-card skeleton"></div>
+        <div class="metric-card skeleton"></div><div class="metric-card skeleton"></div>
+        <div class="metric-card skeleton"></div>
+      </section>
+
+      <section class="workspace">
+        <div class="view-tabs" id="view-tabs" role="tablist" aria-label="ETF 数据分类"></div>
+
+        <div class="toolbar">
+          <label class="search-field">
+            <span>搜索</span>
+            <input id="fund-search" type="search" placeholder="基金代码、名称或跟踪指数" autocomplete="off" />
+          </label>
+          <label class="filter-field">
+            <span>申购状态</span>
+            <select id="status-filter">
+              <option value="all">全部状态</option>
+              <option value="open">可申购</option>
+              <option value="limited">限额申购</option>
+              <option value="suspended">暂停申购</option>
+            </select>
+          </label>
+          <button class="secondary-button" id="export-button" type="button" disabled>导出 CSV</button>
+        </div>
+
+        <div class="table-summary">
+          <div><p class="eyebrow">Dataset</p><h2 id="view-title">场内 ETF</h2></div>
+          <p id="result-count">正在加载数据…</p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="fund-table">
+            <thead id="fund-head"></thead>
+            <tbody id="fund-body"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state" hidden>
+            <strong>暂时没有可展示的数据</strong>
+            <p>数据接口未连接或当前筛选没有结果。页面不会用演示数字代替真实行情。</p>
+            <button class="secondary-button" id="retry-button" type="button">重新加载</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="method-grid" aria-label="数据说明">
+        <article><span>01</span><h2>来源可追溯</h2><p>每次响应必须包含来源、统计口径和更新时间，缺少元数据的数据不会进入页面。</p></article>
+        <article><span>02</span><h2>新鲜度可判断</h2><p>过期快照会明确标记，接口失败时保留最后一份有效缓存并展示警告。</p></article>
+        <article><span>03</span><h2>指标不混用</h2><p>价格、净值、溢价和收益必须基于兼容日期与口径，避免用不同交易日误算。</p></article>
+      </section>
+    </main>
+
+    <aside class="compare-tray" id="compare-tray" hidden aria-live="polite">
+      <div><b>基金对比</b><span id="compare-count">0 / 4</span></div>
+      <div class="compare-items" id="compare-items"></div>
+      <button class="secondary-button" id="clear-compare" type="button">清空</button>
+      <button class="primary-button" id="open-compare" type="button">开始对比</button>
+    </aside>
+
+    <dialog class="compare-dialog" id="compare-dialog">
+      <form method="dialog" class="dialog-shell">
+        <div class="dialog-head"><div><p class="eyebrow">Compare</p><h2>基金横向对比</h2></div><button value="close" aria-label="关闭">×</button></div>
+        <div id="compare-content"></div>
+      </form>
+    </dialog>
+
+    <footer class="etf-footer">
+      <p>© 2026 51VIPAI · 数据仅供研究与信息参考，不构成投资建议。</p>
+      <a href="../index.html">返回研究库</a>
+    </footer>
+
+    <script src="config.js?v=1"></script>
+    <script src="app.js?v=1"></script>
+  </body>
+</html>

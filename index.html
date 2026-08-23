@@ -27,7 +27,7 @@
         <div class="nav-links">
           <button class="nav-tab active" type="button" data-category="us-stocks">美股</button>
           <button class="nav-tab" type="button" data-category="ai">AI</button>
-          <button class="nav-tab" type="button" data-category="etf">ETF</button>
+          <a class="nav-tab" href="etf/index.html">ETF</a>
         </div>
 
         <button class="search-button" type="button" aria-label="搜索">
@@ -59,8 +59,6 @@
     </header>
 
     <main class="page-shell">
-      <section class="etf-module" id="etf-module" hidden aria-label="ETF 研究模块"></section>
-
       <section class="research-grid" aria-label="研究地图">
         <a class="research-card us-card" href="categories/us-stocks.html">
           <span class="part-num">01</span>
@@ -84,19 +82,19 @@
             <span>工具</span><span>模型</span><span>Agent</span><span>产业链</span>
           </div>
         </a>
-        <div class="research-card system-card">
+        <a class="research-card system-card" href="etf/index.html">
           <span class="part-num">03</span>
           <div>
-          <span class="card-label">Roadmap</span>
-          <h2>索引系统建设</h2>
-          <p>后续加入搜索、标签、公司索引、专题地图和真实研究笔记。</p>
+          <span class="card-label">ETF Research</span>
+          <h2>ETF 与 QDII</h2>
+          <p>对比场内 ETF、纳指标普基金与主动 QDII，关注费率、规模、收益、溢价和申购状态。</p>
           </div>
           <div class="status-list">
-            <span>已上线 MVP</span>
-            <span>正在优化 UI</span>
-            <span>下一步填充真实内容</span>
+            <span>市场概览</span>
+            <span>基金筛选</span>
+            <span>自选对比</span>
           </div>
-        </div>
+        </a>
       </section>
 
       <section class="ticker-bar fig" id="quick-links" aria-label="快捷入口">
@@ -160,6 +158,5 @@
 
     <script src="content.js"></script>
     <script src="script.js"></script>
-    <script src="etf.js"></script>
   </body>
 </html>

@@ -156,6 +156,18 @@ git push = 告诉 Cloudflare：我有新版本了，请重新上线
 
 因为你现在的网站是静态网站，只有 HTML、CSS、JavaScript 和图片。Cloudflare 可以直接托管这些文件。
 
+ETF 页面仍可作为静态前端部署，但其真实行情需要 `/api/v1/etf/dashboard`。在第二阶段后端完成前，线上页面会诚实显示“数据服务尚未连接”，不会回退到演示行情。API 响应格式见 `etf/API.md`。
+
+ETF API 使用 Cloudflare Worker + D1。首次部署前执行：
+
+```text
+npm install
+npm run db:migrate:remote
+npm run deploy
+```
+
+Worker 仅接管 `www.51vipai.com/api/*`，现有 Cloudflare Pages 继续托管 HTML、CSS 和 JavaScript。正式迁移数据库和部署会改变 Cloudflare 线上资源，应在确认账户及数据源后再执行。
+
 ### 什么时候需要服务器？
 
 当你以后需要登录、评论、会员、数据库、支付、后台管理系统时，才可能需要服务器或数据库。
