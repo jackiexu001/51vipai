@@ -155,17 +155,16 @@
   async function loadData() {
     setLoading();
     try {
-      state.data = await requestDashboard();
+      state.data = await requestFallbackDashboard();
       renderFreshness();
       renderMetrics();
-      hideNotice();
+      showNotice("当前使用 WiseETF 公开接口字段整理的本地快照；后端 Worker 部署后可切换为同口径实时聚合。");
     } catch (error) {
       try {
-        state.data = await requestFallbackDashboard();
+        state.data = await requestDashboard();
         renderFreshness();
         renderMetrics();
-        const reason = error?.name === "AbortError" ? "本地数据服务请求超时" : "本地数据服务尚未连接";
-        showNotice(`${reason}，当前使用 WiseETF 公开接口字段整理的本地快照。快照数据仅供研究参考，接入后端后会自动切回实时 API。`);
+        showNotice("本地 WiseETF 字段快照未读取成功，当前回退到站点 ETF API。");
       } catch (fallbackError) {
         state.data = null;
         renderUnavailable(error || fallbackError);
