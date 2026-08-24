@@ -7,6 +7,7 @@
     <meta name="description" content="51VIPAI 的美股内容分类页。" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../etf/styles.css?v=expanded-ticker-20260824" />
+    <link rel="stylesheet" href="us-roadmap.css?v=20260824" />
   </head>
   <body class="category-page" data-category="us-stocks">
     <header class="etf-header unified-header">
@@ -27,12 +28,21 @@
         <h1 id="category-page-title">美股</h1>
         <p id="category-page-intro"></p>
       </header>
+      <section class="us-roadmap" id="us-roadmap" aria-labelledby="roadmap-title">
+        <div class="roadmap-heading">
+          <div><p class="eyebrow">START HERE · 5 STEPS</p><h2 id="roadmap-title">从认知到配置：美股起步路线</h2></div>
+          <p>依次理解基础知识、账户与资金路径，最后进入投研和资产配置。点击任一步查看文章介绍。</p>
+        </div>
+        <div class="roadmap-track" id="roadmap-track" role="tablist" aria-label="美股起步五阶段"></div>
+        <article class="roadmap-detail" id="roadmap-detail" aria-live="polite"></article>
+      </section>
       <section class="featured-grid" id="category-page-grid"></section>
     </main>
     <script src="../content.js"></script>
     <script src="../category.js"></script>
+    <script src="us-roadmap.js?v=20260824"></script>
     <script src="../site-ui.js"></script>
     <script src="../market-ticker.js?v=expanded-ticker-20260824"></script>
-    <script src="/feedback-widget.js?v=20260824"></script>
+    <script src="/feedback-widget.js?v=roadmap-20260824"></script>
   </body>
 </html>
