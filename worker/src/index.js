@@ -1373,6 +1373,24 @@ function latestPriceAt(rows, date, cursor) {
   return row && row.date <= date ? row.price : null;
 }
 
+function calculateXirr(cashflows, finalValue, finalDate) {
+  if (!cashflows.length || finalValue <= 0) return null;
+  const origin = new Date(cashflows[0].date).getTime();
+  const datedFlows = cashflows.map((flow) => ({ amount: -flow.amount, years: (new Date(flow.date).getTime() - origin) / (365.25 * 86400000) }));
+  datedFlows.push({ amount: finalValue, years: (new Date(finalDate).getTime() - origin) / (365.25 * 86400000) });
+  const npv = (rate) => datedFlows.reduce((sum, flow) => sum + flow.amount / ((1 + rate) ** flow.years), 0);
+  let low = -.9999, high = 10;
+  let lowValue = npv(low), highValue = npv(high);
+  while (lowValue * highValue > 0 && high < 100000) { high *= 2; highValue = npv(high); }
+  if (!Number.isFinite(lowValue) || !Number.isFinite(highValue) || lowValue * highValue > 0) return null;
+  for (let index = 0; index < 100; index += 1) {
+    const middle = (low + high) / 2, value = npv(middle);
+    if (Math.abs(value) < .000001) return middle * 100;
+    if (lowValue * value <= 0) { high = middle; highValue = value; } else { low = middle; lowValue = value; }
+  }
+  return ((low + high) / 2) * 100;
+}
+
 async function dcaBacktest(request) {
   const contentType = request.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) return errorResponse(415, "UNSUPPORTED_MEDIA_TYPE", "请使用 JSON 提交回测参数。");
@@ -1400,7 +1418,7 @@ async function dcaBacktest(request) {
     const cursors = Object.fromEntries(symbols.map((symbol) => [symbol, { index: 0 }]));
     const shares = Object.fromEntries(assets.map((asset) => [asset.symbol, 0]));
     let benchmarkShares = 0, invested = 0, peak = 0, maxDrawdownPct = 0, previousEvent = null, previousYear = null, initialized = false;
-    const timeline = [];
+    const timeline = [], cashflows = [];
     for (const date of calendar) {
       const prices = Object.fromEntries(symbols.map((symbol) => [symbol, latestPriceAt(histories[symbol], date, cursors[symbol])]));
       if (symbols.some((symbol) => !prices[symbol])) continue;
@@ -1410,7 +1428,7 @@ async function dcaBacktest(request) {
       initialized = true;
       if (contribution > 0) {
         assets.forEach((asset) => { shares[asset.symbol] += contribution * asset.weight / 100 / prices[asset.symbol]; });
-        benchmarkShares += contribution / prices[benchmark]; invested += contribution; previousEvent = date;
+        benchmarkShares += contribution / prices[benchmark]; invested += contribution; previousEvent = date; cashflows.push({ date, amount: contribution });
       }
       if (rebalance === "annual" && previousYear && year !== previousYear) {
         const value = assets.reduce((sum, asset) => sum + shares[asset.symbol] * prices[asset.symbol], 0);
@@ -1424,10 +1442,10 @@ async function dcaBacktest(request) {
       else timeline[timeline.length - 1] = { date, invested: Math.round(invested * 100) / 100, portfolio: Math.round(portfolio * 100) / 100, benchmark: Math.round(benchmarkValue * 100) / 100 };
     }
     if (!timeline.length || invested <= 0) throw new Error("所选日期内没有足够的共同交易日");
-    const last = timeline.at(-1), years = Math.max((new Date(last.date) - new Date(timeline[0].date)) / (365.25 * 86400000), 1 / 365.25);
+    const last = timeline.at(-1);
     const profit = last.portfolio - invested, returnPct = profit / invested * 100;
-    const annualizedPct = ((last.portfolio / invested) ** (1 / years) - 1) * 100;
-    return json({ data: { invested, finalValue: last.portfolio, profit, returnPct, annualizedPct, maxDrawdownPct, benchmark, benchmarkValue: last.benchmark, benchmarkReturnPct: (last.benchmark - invested) / invested * 100, timeline }, meta: { source: "Yahoo Finance 复权历史行情", asOf: last.date, generatedAt: new Date().toISOString(), methodology: "按所选频率投入，支持碎股与年度再平衡；年化收益为累计投入基础上的简化估算。" } });
+    const annualizedPct = calculateXirr(cashflows, last.portfolio, last.date);
+    return json({ data: { invested, finalValue: last.portfolio, profit, returnPct, annualizedPct, maxDrawdownPct, benchmark, benchmarkValue: last.benchmark, benchmarkReturnPct: (last.benchmark - invested) / invested * 100, timeline }, meta: { source: "Yahoo Finance 复权历史行情", asOf: last.date, generatedAt: new Date().toISOString(), methodology: "按所选频率投入，支持碎股与年度再平衡；年化收益采用按实际投入日期计算的 XIRR 资金加权收益率。" } });
   } catch (error) { return errorResponse(503, "HISTORY_UNAVAILABLE", "历史行情暂时不可用。", { reason: error.message }); }
 }
 
