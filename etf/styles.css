@@ -44,8 +44,6 @@ button { cursor: pointer; }
 .etf-nav-links a.active { color: #f1b861; background: rgba(255,255,255,.05); }
 .nav-us-menu { position:relative; height:100%; }
 .nav-us-menu > a { display:flex; height:100%; align-items:center; justify-content:center; }
-.nav-us-caret { margin-left:7px; font-size:14px; font-style:normal; transition:transform .18s ease; }
-.nav-us-menu > a[aria-expanded="true"] .nav-us-caret { transform:rotate(180deg); }
 .nav-us-dropdown { position:absolute; z-index:60; top:calc(100% - 1px); left:50%; width:340px; transform:translateX(-50%); border:1px solid rgba(255,255,255,.16); border-top:3px solid var(--gold); background:var(--surface); color:var(--ink); box-shadow:0 24px 70px rgba(4,12,20,.35); }
 .etf-nav-links .nav-us-dropdown > a { display:grid; grid-template-columns:32px 1fr auto; place-items:initial; align-items:center; gap:10px; min-width:0; min-height:52px; height:auto; padding:0 14px; border:0; border-bottom:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:400; }
 .etf-nav-links .nav-us-dropdown > a:hover { background:var(--surface-2); }
@@ -55,9 +53,9 @@ button { cursor: pointer; }
 .nav-us-dropdown > a > small { color:var(--muted); font-size:10px; }
 .etf-nav-links .nav-us-dropdown > a.ready { background:color-mix(in srgb,var(--gold) 10%,var(--surface)); }
 .etf-nav-links .nav-us-dropdown > a.ready small { color:var(--rust); font-weight:900; }
-.etf-nav-links .nav-us-dropdown > a.nav-us-home { grid-template-columns:1fr auto; min-height:46px; background:var(--navy); color:#fff; }
-.nav-us-home span { color:#fff !important; font-family:var(--sans) !important; font-size:12px !important; }
-.nav-us-home small { color:#f1b861 !important; font-family:var(--mono); }
+.nav-menu-pending { display:flex; min-height:68px; align-items:center; justify-content:space-between; gap:18px; padding:0 18px; background:var(--surface); }
+.nav-menu-pending b { font-size:13px; }
+.nav-menu-pending small { color:var(--gold); font:800 9px var(--mono); letter-spacing:.12em; }
 .theme-button { width: 40px; height: 40px; border: 1px solid rgba(255,255,255,.24); background: transparent; color: white; }
 .market-ticker { position: relative; overflow: hidden; border-top: 1px solid rgba(255,255,255,.08); background: rgba(4,13,22,.3); color: #f7f1e6; }
 .market-ticker::before,.market-ticker::after { content:""; position:absolute; z-index:2; inset:0 auto 0; width:72px; pointer-events:none; background:linear-gradient(90deg,var(--navy),transparent); }
