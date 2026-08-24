@@ -7,7 +7,7 @@
     <title>ETF 与 QDII 研究 | 51VIPAI</title>
     <meta name="description" content="51VIPAI ETF 研究页：对比场内 ETF、纳指与标普场外基金、主动 QDII 的费率、规模、收益、溢价和申购状态。" />
     <link rel="canonical" href="https://www.51vipai.com/etf/" />
-    <link rel="stylesheet" href="styles.css?v=lazy-20260823" />
+    <link rel="stylesheet" href="styles.css?v=compact-20260824" />
   </head>
   <body>
     <a class="skip-link" href="#etf-content">跳到主要内容</a>
@@ -25,30 +25,13 @@
         </div>
         <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
       </nav>
-
-      <section class="etf-hero">
-        <p class="hero-kicker">ETF / QDII · DATA WORKSPACE</p>
-        <div class="hero-heading">
-          <div>
-            <h1>ETF 与 QDII 研究台</h1>
-            <p>把行情、费率、溢价、规模与申购状态放在同一个可核验的数据界面里。</p>
-          </div>
-          <div class="freshness" id="freshness" aria-live="polite">
-            <span class="status-dot loading"></span>
-            <div><b>正在连接数据服务</b><small>等待 API 响应</small></div>
-          </div>
-        </div>
-      </section>
     </header>
 
     <main id="etf-content" class="etf-shell">
+      <div class="freshness" id="freshness" hidden aria-live="polite"></div>
       <section class="notice" id="data-notice" hidden role="status"></section>
 
-      <section class="metric-grid" id="metric-grid" aria-label="市场指标">
-        <div class="metric-card skeleton"></div><div class="metric-card skeleton"></div>
-        <div class="metric-card skeleton"></div><div class="metric-card skeleton"></div>
-        <div class="metric-card skeleton"></div>
-      </section>
+      <section class="metric-grid" id="metric-grid" hidden aria-label="市场指标"></section>
 
       <section class="workspace">
         <div class="view-tabs" id="view-tabs" role="tablist" aria-label="ETF 数据分类"></div>
@@ -117,6 +100,7 @@
     </footer>
 
     <script src="config.js?v=lazy-20260823"></script>
+    <script src="../market-ticker.js?v=compact-20260824"></script>
     <script src="app.js?v=lazy-20260823"></script>
   </body>
 </html>
