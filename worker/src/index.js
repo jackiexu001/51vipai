@@ -36,7 +36,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
-const DASHBOARD_VERSION = 5;
+const DASHBOARD_VERSION = 6;
 const UNIVERSE_VERSION = 18;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
@@ -334,13 +334,49 @@ async function buildMarketMetrics() {
     ["BTC-USD", "bitcoin", "比特币"],
     ["ETH-USD", "ethereum", "以太币"],
   ];
+  const sparkMetrics = await fetchYahooSparkMetrics(definitions).catch(() => []);
+  const completedIds = new Set(sparkMetrics.map((metric) => metric.id));
+  const missingDefinitions = definitions.filter(([, id]) => !completedIds.has(id));
   const metrics = [];
-  for (let offset = 0; offset < definitions.length; offset += 4) {
-    const batch = definitions.slice(offset, offset + 4);
+  for (let offset = 0; offset < missingDefinitions.length; offset += 4) {
+    const batch = missingDefinitions.slice(offset, offset + 4);
     const results = await Promise.allSettled(batch.map(([symbol, id, label]) => metricFromYahoo(symbol, id, label)));
     metrics.push(...results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : [])));
   }
-  return metrics;
+  const byId = new Map([...sparkMetrics, ...metrics].map((metric) => [metric.id, metric]));
+  return definitions.flatMap(([, id]) => byId.has(id) ? [byId.get(id)] : []);
+}
+
+async function fetchYahooSparkMetrics(definitions) {
+  const symbols = definitions.map(([symbol]) => symbol).join(",");
+  let lastError = null;
+  for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
+    try {
+      const data = await fetchJson(`https://${host}/v7/finance/spark?symbols=${encodeURIComponent(symbols)}&range=5d&interval=1d`, {
+        headers: { accept: "application/json" },
+      });
+      const sparkRows = Array.isArray(data?.spark?.result)
+        ? data.spark.result
+        : Object.entries(data || {}).map(([symbol, value]) => ({ symbol, ...value }));
+      const rowBySymbol = new Map(sparkRows.map((row) => [row.symbol, row]));
+      return definitions.flatMap(([symbol, id, label]) => {
+        const row = rowBySymbol.get(symbol);
+        const chart = row?.response?.[0] || row;
+        const quote = chart?.indicators?.quote?.[0] || {};
+        const closes = (quote.close || chart?.close || []).filter((item) => typeof item === "number");
+        const current = chart?.meta?.regularMarketPrice ?? closes[closes.length - 1] ?? null;
+        const previous = closes.length > 1 ? closes[closes.length - 2] : chart?.meta?.chartPreviousClose;
+        if (current === null) return [];
+        const changePct = current && previous ? ((current - previous) / previous) * 100 : null;
+        const timestamps = chart?.timestamp || row?.timestamp || [];
+        const asOf = timestamps.length ? new Date(timestamps[timestamps.length - 1] * 1000).toISOString() : marketTimestamp(chart?.meta);
+        return [makeMarketMetric(id, label, current, changePct, asOf)];
+      });
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Yahoo spark metrics unavailable");
 }
 
 function wiseStatus(value) {
@@ -461,14 +497,18 @@ async function buildWiseDashboardSnapshot() {
 
 async function metricFromYahoo(symbol, id, label) {
   const chart = await fetchYahooChart(symbol);
+  return makeMarketMetric(id, label, chart.value, chart.changePct, chart.asOf);
+}
+
+function makeMarketMetric(id, label, value, changePct, asOf) {
   return compactObject({
     id,
     label,
-    value: chart.value,
-    displayValue: chart.value === null ? "—" : chart.value.toLocaleString("zh-CN", { maximumFractionDigits: id === "usdcny" ? 4 : 2 }),
-    changePct: chart.changePct,
-    note: `${formatPct(chart.changePct)} · Yahoo Finance 延迟行情`,
-    asOf: chart.asOf,
+    value,
+    displayValue: value === null ? "—" : value.toLocaleString("zh-CN", { maximumFractionDigits: id === "usdcny" ? 4 : 2 }),
+    changePct,
+    note: `${formatPct(changePct)} · Yahoo Finance 延迟行情`,
+    asOf,
   });
 }
 
