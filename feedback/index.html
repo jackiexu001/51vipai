@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>公告与反馈 | 51VIPAI</title>
+    <meta name="description" content="查看 51VIPAI 更新公告，提交建议、问题和内容反馈。" />
+    <link rel="canonical" href="https://www.51vipai.com/feedback/" />
+    <link rel="stylesheet" href="../etf/styles.css?v=feedback-20260824" />
+    <link rel="stylesheet" href="feedback.css?v=20260824" />
+  </head>
+  <body data-feedback-widget="off">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../index.html"><span>51VIPAI</span><small>NOTICE &amp; FEEDBACK</small></a>
+        <div class="etf-nav-links">
+          <a href="../index.html">首页</a>
+          <a href="../categories/us-stocks.html">美股</a>
+          <a href="../categories/ai.html">AI</a>
+          <a href="../etf/">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+
+    <main class="feedback-shell">
+      <header class="feedback-page-head">
+        <p class="eyebrow">NOTICE · FEEDBACK</p>
+        <h1>公告与反馈</h1>
+        <p>记录网站的持续变化，也认真收下每一个建议。</p>
+      </header>
+
+      <div class="feedback-layout">
+        <section class="update-panel" aria-labelledby="updates-title">
+          <div class="panel-title"><span>📋</span><div><p class="eyebrow">CHANGELOG</p><h2 id="updates-title">更新日志</h2></div></div>
+          <ol class="update-timeline">
+            <li><time datetime="2026-08-24">2026年8月24日</time><b>📣 全站 UI、行情滚动带与 ETF 指数指南持续升级</b><p>统一四个一级页面，增加15项全球行情，并完善纳指与标普核心持仓展示。</p></li>
+            <li><time datetime="2026-08-23">2026年8月23日</time><b>📊 ETF 数据工作台上线</b><p>接入东方财富公开数据、Yahoo Finance 延迟行情与 D1 快照。</p></li>
+            <li><time datetime="2026-08-23">2026年8月23日</time><b>🧺 15个经典懒人组合上线</b><p>提供资产配置、回测指标、年度收益和独立详情页。</p></li>
+          </ol>
+        </section>
+
+        <section class="feedback-panel" id="submit" aria-labelledby="feedback-title">
+          <div class="panel-title"><span>💬</span><div><p class="eyebrow">YOUR VOICE</p><h2 id="feedback-title">你的反馈很重要</h2></div></div>
+          <p class="panel-intro">想要什么功能、发现了什么问题，或者只是想给一个鼓励，都欢迎告诉我们。</p>
+          <form id="feedback-form">
+            <label><span>反馈类型</span><select name="type"><option value="suggestion">功能建议</option><option value="bug">问题反馈</option><option value="content">内容建议</option><option value="other">其他</option></select></label>
+            <label><span>反馈内容</span><textarea name="message" rows="6" minlength="5" maxlength="4000" required placeholder="请尽量描述具体页面、问题或你期待的效果……"></textarea></label>
+            <label><span>联系方式 <small>选填</small></span><input name="contact" maxlength="160" placeholder="邮箱、微信或其他方便联系的方式" /></label>
+            <label class="feedback-honeypot" aria-hidden="true"><span>网站</span><input name="website" tabindex="-1" autocomplete="off" /></label>
+            <button class="feedback-submit" type="submit">提交反馈</button>
+            <p class="feedback-status" id="feedback-status" role="status" aria-live="polite"></p>
+          </form>
+          <div class="community-box" id="community">
+            <div><p class="eyebrow">COMMUNITY</p><h3>加入交流群</h3><p>交流群入口正在准备中。开放后会在这里放置二维码或邀请链接。</p></div>
+            <span>即将开放</span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="etf-footer"><p>© 2026 51VIPAI · 感谢每一位帮助网站变得更好的朋友。</p></footer>
+    <script src="../site-ui.js"></script>
+    <script src="../market-ticker.js?v=expanded-ticker-20260824"></script>
+    <script src="feedback.js?v=20260824"></script>
+  </body>
+</html>

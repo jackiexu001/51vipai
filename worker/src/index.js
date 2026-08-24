@@ -144,6 +144,17 @@ const CORE_SCHEMA_STATEMENTS = [
     PRIMARY KEY (metric_id, observed_at),
     FOREIGN KEY (source_id) REFERENCES data_sources(id)
   )`,
+  `CREATE TABLE IF NOT EXISTS feedback_submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    feedback_type TEXT NOT NULL CHECK (feedback_type IN ('suggestion', 'bug', 'content', 'other')),
+    message TEXT NOT NULL,
+    contact TEXT,
+    page_url TEXT,
+    status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewing', 'resolved', 'archived')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  `CREATE INDEX IF NOT EXISTS feedback_submissions_recent
+    ON feedback_submissions (created_at DESC)`,
 ];
 
 function json(data, init = {}) {
@@ -1336,6 +1347,36 @@ async function health(env) {
   return json({ status: database === "ok" ? "ok" : "degraded", services: { database }, checkedAt: new Date().toISOString() });
 }
 
+async function submitFeedback(request, env) {
+  if (!env.DB) return errorResponse(503, "DATABASE_UNAVAILABLE", "反馈服务暂时不可用，请稍后再试。");
+  const contentType = request.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) return errorResponse(415, "UNSUPPORTED_MEDIA_TYPE", "请使用 JSON 提交反馈。");
+  const raw = await request.text();
+  if (raw.length > 12000) return errorResponse(413, "PAYLOAD_TOO_LARGE", "反馈内容过长。");
+  let body;
+  try { body = JSON.parse(raw); } catch { return errorResponse(400, "INVALID_JSON", "反馈内容格式不正确。"); }
+  if (String(body.website || "").trim()) return json({ ok: true, message: "感谢反馈。" }, { status: 202 });
+
+  const allowedTypes = new Set(["suggestion", "bug", "content", "other"]);
+  const feedbackType = allowedTypes.has(body.type) ? body.type : "suggestion";
+  const message = String(body.message || "").trim();
+  const contact = String(body.contact || "").trim().slice(0, 160) || null;
+  const pageUrl = String(body.pageUrl || "").trim().slice(0, 500) || null;
+  if (message.length < 5) return errorResponse(400, "MESSAGE_TOO_SHORT", "请至少填写 5 个字的反馈内容。");
+  if (message.length > 4000) return errorResponse(400, "MESSAGE_TOO_LONG", "反馈内容不能超过 4000 字。");
+
+  try {
+    await ensureCoreSchema(env);
+    const result = await env.DB.prepare(
+      `INSERT INTO feedback_submissions (feedback_type, message, contact, page_url)
+       VALUES (?, ?, ?, ?)`
+    ).bind(feedbackType, message, contact, pageUrl).run();
+    return json({ ok: true, id: result.meta?.last_row_id || null, message: "感谢你的反馈，我们会认真阅读。" }, { status: 201 });
+  } catch (error) {
+    return errorResponse(500, "FEEDBACK_SAVE_FAILED", "反馈暂时未能保存，请稍后重试。", { reason: error.message });
+  }
+}
+
 async function recordScheduledRun(env) {
   if (!env.DB) return;
   const startedAt = new Date().toISOString();
@@ -1379,10 +1420,11 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (request.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
-      return new Response(null, { status: 204, headers: { allow: "GET, HEAD, OPTIONS" } });
+      return new Response(null, { status: 204, headers: { allow: "GET, HEAD, POST, OPTIONS" } });
     }
+    if (url.pathname === "/api/v1/feedback" && request.method === "POST") return submitFeedback(request, env);
     if (!["GET", "HEAD"].includes(request.method)) {
-      return errorResponse(405, "METHOD_NOT_ALLOWED", "Only GET and HEAD are supported.", { allow: ["GET", "HEAD"] });
+      return errorResponse(405, "METHOD_NOT_ALLOWED", "Method not supported.", { allow: ["GET", "HEAD", "POST"] });
     }
     if (url.pathname === "/api/v1/health") return health(env);
     if (url.pathname === "/api/v1/etf/dashboard") return dashboard(env);
