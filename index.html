@@ -9,50 +9,26 @@
       content="51VIPAI 是一个记录美股与 AI 学习、研究和工具的个人内容站。"
     />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="etf/styles.css?v=unified-20260824" />
   </head>
   <body>
-    <header class="site-header hero">
-      <div class="top-strip">
-        <p>51VIPAI Research OS · 美股与 AI 研究库正在搭建</p>
-        <div class="social-links" id="top-social-links" aria-label="社交媒体链接"></div>
-      </div>
-
-      <nav class="main-nav" aria-label="主导航">
-        <a class="brand" id="brand-link" href="#"></a>
-
-        <button class="menu-button" type="button" aria-expanded="false">
-          菜单
-        </button>
-
-        <div class="nav-links">
-          <button class="nav-tab active" type="button" data-category="us-stocks">美股</button>
-          <button class="nav-tab" type="button" data-category="ai">AI</button>
-          <a class="nav-tab" href="etf/index.html">ETF</a>
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="index.html" aria-label="51VIPAI 首页"><span>51VIPAI</span><small>RESEARCH OS</small></a>
+        <div class="etf-nav-links">
+          <a class="active" href="index.html" aria-current="page">首页</a>
+          <a href="categories/us-stocks.html">美股</a>
+          <a href="categories/ai.html">AI</a>
+          <a href="etf/index.html">ETF</a>
         </div>
-
-        <button class="search-button" type="button" aria-label="搜索">
-          搜索
-        </button>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
       </nav>
-
-      <section class="hero-in">
-        <div class="hero-copy">
-          <p class="kicker">Research memo · Public notes · <b>美股 / AI</b></p>
-          <h1>
-            美股与 AI 研究库
-            <em>51VIPAI KNOWLEDGE MAP</em>
-          </h1>
-          <p class="lede">
-            用研究报告的方式整理长期关注的问题：指数、公司、财报、AI 工具、产业链与关键事件。先从公开笔记开始，逐步沉淀成可复用的个人知识地图。
-          </p>
-          <form class="hero-search" action="#" role="search">
-            <input type="search" placeholder="搜索 公司 / 概念 / 工具 / 文章..." aria-label="搜索内容" />
-            <button type="submit">SEARCH</button>
-          </form>
-          <div class="meta">
-            <div><b>03</b><span>核心栏目</span></div>
-            <div><b>08</b><span>内容入口</span></div>
-            <div><b>01</b><span>公开版本</span></div>
+      <section class="etf-hero">
+        <p class="hero-kicker">RESEARCH MEMO · PUBLIC NOTES</p>
+        <div class="hero-heading">
+          <div>
+            <h1>美股与 AI 研究库</h1>
+            <p>用研究报告的方式整理指数、公司、财报、AI 工具、产业链与关键事件，逐步沉淀成可复用的个人知识地图。</p>
           </div>
         </div>
       </section>
@@ -158,5 +134,6 @@
 
     <script src="content.js"></script>
     <script src="script.js"></script>
+    <script src="site-ui.js"></script>
   </body>
 </html>

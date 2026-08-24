@@ -77,5 +77,5 @@ function renderCategoryPage() {
     .join("");
 }
 
-renderBrand();
+if (brandLink) renderBrand();
 renderCategoryPage();

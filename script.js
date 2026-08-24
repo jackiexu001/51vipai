@@ -79,22 +79,24 @@ function renderCategory(categoryKey) {
 }
 
 function renderSiteLinks() {
-  topSocialLinks.innerHTML = siteConfig.socialLinks
-    .slice(0, 4)
-    .map(
-      (link) =>
-        `<a class="social-icon" href="${link.url}" aria-label="${link.label}">${socialIcon(link)}</a>`,
-    )
-    .join("");
+  if (topSocialLinks) {
+    topSocialLinks.innerHTML = siteConfig.socialLinks
+      .slice(0, 4)
+      .map(
+        (link) =>
+          `<a class="social-icon" href="${link.url}" aria-label="${link.label}">${socialIcon(link)}</a>`,
+      )
+      .join("");
+  }
 
-  sidebarSocialLinks.innerHTML = siteConfig.socialLinks
+  if (sidebarSocialLinks) sidebarSocialLinks.innerHTML = siteConfig.socialLinks
     .map(
       (link) =>
         `<li><a href="${link.url}"><span class="social-icon small">${socialIcon(link)}</span>${link.label}</a></li>`,
     )
     .join("");
 
-  quickLinks.innerHTML = [
+  if (quickLinks) quickLinks.innerHTML = [
     "<span>快捷入口</span>",
     ...siteConfig.quickLinks.map(
       (link) => `<a href="${link.url}">${link.label}</a>`,
@@ -118,12 +120,12 @@ function activateTab(category) {
   renderCategory(category);
 }
 
-menuButton.addEventListener("click", () => {
+menuButton?.addEventListener("click", () => {
   const isOpen = navLinks.classList.toggle("open");
   menuButton.setAttribute("aria-expanded", String(isOpen));
 });
 
-renderBrand();
+if (brandLink) renderBrand();
 renderSiteLinks();
 
 const initialTab = "us-stocks";

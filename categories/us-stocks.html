@@ -6,18 +6,21 @@
     <title>美股 | 51VIPAI</title>
     <meta name="description" content="51VIPAI 的美股内容分类页。" />
     <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="../etf/styles.css?v=unified-20260824" />
   </head>
   <body class="category-page" data-category="us-stocks">
-    <header class="site-header">
-      <nav class="main-nav">
-        <a class="brand" id="brand-link" href="../index.html"></a>
-        <div class="nav-links category-nav">
-          <a class="nav-tab active" href="us-stocks.html">美股</a>
-          <a class="nav-tab" href="ai.html">AI</a>
-          <a class="nav-tab" href="../etf/index.html">ETF</a>
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../index.html"><span>51VIPAI</span><small>US EQUITIES</small></a>
+        <div class="etf-nav-links">
+          <a href="../index.html">首页</a>
+          <a class="active" href="us-stocks.html" aria-current="page">美股</a>
+          <a href="ai.html">AI</a>
+          <a href="../etf/index.html">ETF</a>
         </div>
-        <a class="search-button" href="../index.html">首页</a>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
       </nav>
+      <section class="etf-hero"><p class="hero-kicker">US EQUITIES · RESEARCH NOTES</p><div class="hero-heading"><div><h1>美股研究</h1><p>从指数、行业、公司、财报到估值，建立可持续更新的观察框架。</p></div></div></section>
     </header>
     <main class="category-layout">
       <header class="category-header">
@@ -29,5 +32,6 @@
     </main>
     <script src="../content.js"></script>
     <script src="../category.js"></script>
+    <script src="../site-ui.js"></script>
   </body>
 </html>
