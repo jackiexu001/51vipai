@@ -32,7 +32,7 @@ button { cursor: pointer; }
 .skip-link { position: fixed; left: 12px; top: -60px; z-index: 50; padding: 10px 14px; background: white; color: black; }
 .skip-link:focus { top: 12px; }
 
-.etf-header { background: var(--navy); color: #f7f1e6; border-bottom: 5px solid var(--rust); }
+.etf-header { position:relative; z-index:40; overflow:visible; background: var(--navy); color: #f7f1e6; border-bottom: 5px solid var(--rust); }
 .etf-header::before { content: ""; position: absolute; inset: 0 0 auto; height: 340px; pointer-events: none; background: radial-gradient(circle at 82% 16%, rgba(181,74,37,.36), transparent 38%), linear-gradient(120deg, transparent 48%, rgba(255,255,255,.035) 48% 50%, transparent 50%); }
 .etf-nav, .etf-hero, .etf-shell, .etf-footer { position: relative; width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
 .etf-nav { min-height: 76px; display: grid; grid-template-columns: 240px 1fr auto; align-items: center; border-bottom: 1px solid rgba(255,255,255,.14); }
@@ -220,7 +220,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .etf-footer { display:flex; justify-content:space-between; gap:20px; border-top:1px solid var(--line); padding:28px 0 80px; color:var(--muted); font-size:12px; }.etf-footer a { color:var(--rust); font-weight:800; }
 
 /* Shared site frame: the home and research categories use the ETF visual system. */
-.unified-header { position: relative; overflow: hidden; }
+.unified-header { position: relative; overflow: visible; }
 .unified-header + .page-shell,
 .category-layout { width: min(1280px, calc(100% - 48px)); }
 .unified-header + .page-shell { padding-top: 38px; }
