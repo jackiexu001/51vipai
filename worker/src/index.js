@@ -294,21 +294,25 @@ function trackingIndexForListedEtf(name) {
 
 async function fetchYahooChart(symbol) {
   const encoded = encodeURIComponent(symbol);
-  const data = await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=5d&interval=1d`, {
-    headers: { accept: "application/json" },
-  });
-  const result = data?.chart?.result?.[0];
-  if (!result?.meta) throw new Error(`Yahoo chart missing data for ${symbol}`);
-  const quote = result.indicators?.quote?.[0] || {};
-  const closes = (quote.close || []).filter((item) => typeof item === "number");
-  const previous = closes.length > 1 ? closes[closes.length - 2] : result.meta.chartPreviousClose;
-  const current = result.meta.regularMarketPrice ?? closes[closes.length - 1] ?? null;
-  const changePct = current && previous ? ((current - previous) / previous) * 100 : null;
-  return {
-    value: current,
-    changePct,
-    asOf: marketTimestamp(result.meta),
-  };
+  let lastError = null;
+  for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
+    try {
+      const data = await fetchJson(`https://${host}/v8/finance/chart/${encoded}?range=5d&interval=1d`, {
+        headers: { accept: "application/json" },
+      });
+      const result = data?.chart?.result?.[0];
+      if (!result?.meta) throw new Error(`Yahoo chart missing data for ${symbol}`);
+      const quote = result.indicators?.quote?.[0] || {};
+      const closes = (quote.close || []).filter((item) => typeof item === "number");
+      const previous = closes.length > 1 ? closes[closes.length - 2] : result.meta.chartPreviousClose;
+      const current = result.meta.regularMarketPrice ?? closes[closes.length - 1] ?? null;
+      const changePct = current && previous ? ((current - previous) / previous) * 100 : null;
+      return { value: current, changePct, asOf: marketTimestamp(result.meta) };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`Yahoo chart unavailable for ${symbol}`);
 }
 
 async function buildMarketMetrics() {
@@ -1032,6 +1036,7 @@ async function buildDashboardSnapshot() {
         "https://qt.gtimg.cn/",
         "https://hq.sinajs.cn/",
         "https://query1.finance.yahoo.com/",
+        "https://query2.finance.yahoo.com/",
       ],
     },
     metrics,
