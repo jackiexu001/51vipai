@@ -1,11 +1,12 @@
 (() => {
   const menuItems = {
     美股: `
-      <a href="/tools/coming-soon/?tool=bank"><span>01</span><b>开银行卡</b><small>待上线</small></a>
-      <a href="/tools/coming-soon/?tool=broker"><span>02</span><b>开美股券商账户</b><small>待上线</small></a>
-      <a href="/tools/coming-soon/?tool=remittance"><span>03</span><b>跨境汇款</b><small>待上线</small></a>
-      <a href="/tools/coming-soon/?tool=funding"><span>04</span><b>券商出入金</b><small>待上线</small></a>
-      <a class="ready" href="/tools/dca-calculator/"><span>05</span><b>定投 DCA 计算器</b><small>立即使用 →</small></a>`,
+      <a href="/tools/coming-soon/?tool=learning"><span>01</span><b>认知提升</b><small>待上线</small></a>
+      <a href="/tools/coming-soon/?tool=bank"><span>02</span><b>开银行卡</b><small>待上线</small></a>
+      <a href="/tools/coming-soon/?tool=broker"><span>03</span><b>开美股券商账户</b><small>待上线</small></a>
+      <a href="/tools/coming-soon/?tool=remittance"><span>04</span><b>跨境汇款</b><small>待上线</small></a>
+      <a href="/tools/coming-soon/?tool=funding"><span>05</span><b>券商出入金</b><small>待上线</small></a>
+      <a class="ready" href="/tools/dca-calculator/"><span>06</span><b>定投 DCA 计算器</b><small>立即使用 →</small></a>`,
     AI: '<div class="nav-menu-pending"><b>AI 功能入口规划中</b><small>COMING SOON</small></div>',
     ETF: '<div class="nav-menu-pending"><b>ETF 功能入口规划中</b><small>COMING SOON</small></div>',
   };
