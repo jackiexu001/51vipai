@@ -36,6 +36,7 @@ const FALLBACK_INDEX_QDII_FUNDS = [
 ];
 
 const SNAPSHOT_MAX_AGE_MS = 15 * 60 * 1000;
+const DASHBOARD_VERSION = 5;
 const UNIVERSE_VERSION = 18;
 const ON_EXCHANGE_DETAIL_LIMIT = 12;
 const INDEX_QDII_DETAIL_LIMIT_PER_CATEGORY = 14;
@@ -217,7 +218,7 @@ function snapshotNeedsRefresh(row) {
   if (!row || !isSnapshotFresh(row.as_of)) return true;
   try {
     const payload = JSON.parse(row.payload_json);
-    return payload?.meta?.universeVersion !== UNIVERSE_VERSION;
+    return payload?.meta?.version !== DASHBOARD_VERSION || payload?.meta?.universeVersion !== UNIVERSE_VERSION;
   } catch {
     return true;
   }
@@ -1027,7 +1028,7 @@ async function buildDashboardSnapshot() {
       source: SOURCE_LABEL,
       asOf: generatedAt,
       generatedAt,
-      version: 4,
+      version: DASHBOARD_VERSION,
       universeVersion: UNIVERSE_VERSION,
       sourceUrls: [
         "https://fund.eastmoney.com/",
