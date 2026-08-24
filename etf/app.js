@@ -3,7 +3,7 @@
 
   const config = window.ETF_APP_CONFIG;
   const views = [
-    { id: "guide", label: "先弄清指数", title: "纳斯达克 100 与标普 500：先弄清指数，再选择工具" },
+    { id: "guide", label: "先弄清指数", title: "纳斯达克 100 与标普 500" },
     { id: "onExchange", label: "场内 ETF", title: "场内 ETF 溢价与流动性" },
     { id: "nasdaq", label: "场外纳指", title: "纳斯达克指数基金" },
     { id: "sp500", label: "场外标普", title: "标普 500 指数基金" },
@@ -483,6 +483,28 @@
       </div>`).join("");
   }
 
+  function holdingDonut(items, palette) {
+    const total = items.reduce((sum, item) => sum + item.weight, 0);
+    const segments = [];
+    let cursor = 0;
+    items.forEach((item, index) => {
+      const next = cursor + item.weight;
+      segments.push(`${palette[index % palette.length]} ${cursor.toFixed(2)}% ${next.toFixed(2)}%`);
+      cursor = next;
+    });
+    segments.push(`var(--surface-2) ${cursor.toFixed(2)}% 100%`);
+    return `
+      <div class="holding-donut-wrap">
+        <div class="holding-donut" style="background:conic-gradient(${segments.join(",")})" role="img" aria-label="前八大持仓合计 ${total.toFixed(2)}%">
+          <span><b>${total.toFixed(1)}%</b><small>前八大</small></span>
+        </div>
+        <div class="holding-legend">
+          ${items.map((item, index) => `<span><i style="background:${palette[index % palette.length]}"></i><b>${escapeHtml(item.ticker)}</b><em>${item.weight.toFixed(2)}%</em></span>`).join("")}
+          <span><i style="background:var(--surface-2)"></i><b>其他持仓</b><em>${(100 - total).toFixed(2)}%</em></span>
+        </div>
+      </div>`;
+  }
+
   function renderGuidePanel() {
     const qqq = [
       { ticker: "NVDA", name: "NVIDIA", weight: 10.15 },
@@ -505,53 +527,33 @@
       { ticker: "GOOG", name: "Alphabet C", weight: 1.85 },
     ];
     return `
-      <section class="guide-section" id="etf-guide" aria-label="纳指与标普投资指南">
-        <div class="guide-head">
-          <p class="eyebrow">ETF GUIDE</p>
-          <h2>纳斯达克 100 与标普 500：先弄清指数，再选择工具</h2>
-          <p>先回答“我到底买了什么”，再比较“通过哪种工具买”。这一页按 WiseETF 的信息结构重做：指数差异、核心持仓、三种投资路径、开户动作和风险提醒放在同一个工作台里。</p>
-        </div>
-
-        <div class="index-compare-grid">
-          <article class="index-card lift-card">
-            <span class="index-tag">NASDAQ-100 · QQQ</span>
-            <h3>纳斯达克 100：科技成长浓度更高</h3>
-            <p>由纳斯达克上市的大型非金融公司组成，修正市值加权。它不是“全市场”，更像美国大型科技、互联网、半导体和创新公司的集中组合。</p>
-            <ul>
-              <li>风格：成长、科技、头部权重集中。</li>
-              <li>优点：长期弹性强，AI/云/半导体暴露更直接。</li>
-              <li>代价：估值和波动通常更高，回撤可能更猛。</li>
-            </ul>
+      <section class="guide-section" id="etf-guide" aria-label="纳指与标普指数介绍">
+        <div class="index-profile-grid">
+          <article class="index-profile lift-card">
+            <div class="index-profile-copy">
+              <span class="index-tag">NASDAQ-100 · QQQ</span>
+              <h2>纳斯达克 100</h2>
+              <h3>科技成长浓度更高</h3>
+              <p>由纳斯达克上市的大型非金融公司组成，修正市值加权。它不是“全市场”，更像美国大型科技、互联网、半导体和创新公司的集中组合。</p>
+              <ul><li>风格：成长、科技、头部权重集中。</li><li>优点：长期弹性强，AI、云与半导体暴露更直接。</li><li>代价：估值和波动通常更高，回撤可能更猛。</li></ul>
+            </div>
+            ${holdingDonut(qqq, ["#265d84", "#c9963c", "#b54a25", "#327052", "#6b5b95", "#4f86c6", "#d17b49", "#7c9561"])}
+            <div class="index-holding-list"><h4>QQQ 核心持仓</h4>${holdingRows(qqq)}</div>
+            <p class="index-source">截至 2026-04-16 · 来源 stockanalysis.com。权重会随基金披露与指数调整变化。</p>
           </article>
-          <article class="index-card lift-card">
-            <span class="index-tag">S&amp;P 500 · VOO</span>
-            <h3>标普 500：美国大盘核心底仓</h3>
-            <p>覆盖美国 500 家大型上市公司，行业更分散。科技仍然重要，但金融、医疗、消费、工业也会分摊组合风险。</p>
-            <ul>
-              <li>风格：大盘、分散、美国经济 Beta。</li>
-              <li>优点：行业覆盖更完整，更适合做核心仓位。</li>
-              <li>代价：爆发力通常低于纳指，仍需承受权益波动。</li>
-            </ul>
-          </article>
-        </div>
 
-        <div class="holdings-panel">
-          <div>
-            <p class="eyebrow">CORE HOLDINGS</p>
-            <h3>两个指数的核心持仓占比</h3>
-            <p>纳指 100 与标普 500 都绕不开美国超级大盘股；真正的差异在于权重集中度。纳指的前几大科技股更“重”，标普则把更多权重分散给其他行业。</p>
-            <p class="source-note">QQQ 截至 2026-04-16 · VOO 截至 2026-03-31 · 来源 stockanalysis.com；权重会随基金披露与指数调整变化。</p>
-          </div>
-          <div class="holding-columns">
-            <article>
-              <h4>QQQ / 纳斯达克 100 头部</h4>
-              ${holdingRows(qqq)}
-            </article>
-            <article>
-              <h4>VOO / 标普 500 头部</h4>
-              ${holdingRows(voo)}
-            </article>
-          </div>
+          <article class="index-profile lift-card">
+            <div class="index-profile-copy">
+              <span class="index-tag">S&amp;P 500 · VOO</span>
+              <h2>标普 500</h2>
+              <h3>美国大盘核心底仓</h3>
+              <p>覆盖美国 500 家大型上市公司，行业更分散。科技仍然重要，但金融、医疗、消费与工业也会分摊组合风险。</p>
+              <ul><li>风格：大盘、分散、美国经济 Beta。</li><li>优点：行业覆盖更完整，更适合做核心仓位。</li><li>代价：爆发力通常低于纳指，仍需承受权益波动。</li></ul>
+            </div>
+            ${holdingDonut(voo, ["#327052", "#265d84", "#c9963c", "#b54a25", "#6b5b95", "#7c9561", "#4f86c6", "#d17b49"])}
+            <div class="index-holding-list"><h4>VOO 核心持仓</h4>${holdingRows(voo)}</div>
+            <p class="index-source">截至 2026-03-31 · 来源 stockanalysis.com。权重会随基金披露与指数调整变化。</p>
+          </article>
         </div>
 
         <div class="ways-intro">
