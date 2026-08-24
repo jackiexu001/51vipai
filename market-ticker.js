@@ -8,6 +8,17 @@
     { label: "纳斯达克100", displayValue: "—", changePct: null },
     { label: "VIX 恐慌指数", displayValue: "—", changePct: null },
     { label: "美元/人民币", displayValue: "—", changePct: null },
+    { label: "日经225", displayValue: "—", changePct: null },
+    { label: "KOSPI200", displayValue: "—", changePct: null },
+    { label: "费城半导体指数", displayValue: "—", changePct: null },
+    { label: "恒生科技指数", displayValue: "—", changePct: null },
+    { label: "上证综指", displayValue: "—", changePct: null },
+    { label: "沪深300", displayValue: "—", changePct: null },
+    { label: "中证500", displayValue: "—", changePct: null },
+    { label: "黄金", displayValue: "—", changePct: null },
+    { label: "WTI原油", displayValue: "—", changePct: null },
+    { label: "比特币", displayValue: "—", changePct: null },
+    { label: "以太币", displayValue: "—", changePct: null },
   ];
 
   const ticker = document.createElement("section");
@@ -29,9 +40,10 @@
   }
 
   function render(metrics) {
-    const chosen = metrics?.length ? metrics.slice(0, 6) : fallbackMetrics;
+    const chosen = metrics?.length ? metrics : fallbackMetrics;
     const group = `<span class="market-ticker-group">${chosen.map(itemMarkup).join("")}</span>`;
     track.innerHTML = group + group;
+    track.style.animationDuration = `${Math.max(34, chosen.length * 4.5)}s`;
   }
 
   render(fallbackMetrics);

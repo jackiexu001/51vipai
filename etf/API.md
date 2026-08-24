@@ -64,7 +64,7 @@ Current public sources:
 
 | Area | Source | Current fields |
 |---|---|---|
-| Market metrics | Yahoo Finance chart API | S&P 500, Nasdaq 100, VIX, USD/CNY latest value and daily change |
+| Market metrics | Yahoo Finance chart API | S&P 500, Nasdaq 100, VIX, USD/CNY, Nikkei 225, KOSPI 200, Philadelphia Semiconductor, Hang Seng TECH, SSE Composite, CSI 300, CSI 500, gold, WTI, BTC/USD, and ETH/USD latest value and daily change |
 | Listed ETF quotes | Eastmoney quote API | Exchange price change and turnover |
 | Fund details | Eastmoney fund detail script | Fund name, one-year return, latest NAV, latest scale |
 | QDII ranking | Eastmoney QDII ranking script | Active QDII selection and one-year return fallback |

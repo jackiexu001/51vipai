@@ -294,7 +294,7 @@ function trackingIndexForListedEtf(name) {
 
 async function fetchYahooChart(symbol) {
   const encoded = encodeURIComponent(symbol);
-  const data = await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=1y&interval=1d`, {
+  const data = await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encoded}?range=5d&interval=1d`, {
     headers: { accept: "application/json" },
   });
   const result = data?.chart?.result?.[0];
@@ -312,13 +312,30 @@ async function fetchYahooChart(symbol) {
 }
 
 async function buildMarketMetrics() {
-  const metrics = await Promise.allSettled([
-    metricFromYahoo("^GSPC", "sp500", "标普500"),
-    metricFromYahoo("^NDX", "nasdaq100", "纳斯达克100"),
-    metricFromYahoo("^VIX", "vix", "VIX 恐慌指数"),
-    metricFromYahoo("USDCNY=X", "usdcny", "美元/人民币"),
-  ]);
-  return metrics.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+  const definitions = [
+    ["^GSPC", "sp500", "标普500"],
+    ["^NDX", "nasdaq100", "纳斯达克100"],
+    ["^VIX", "vix", "VIX 恐慌指数"],
+    ["USDCNY=X", "usdcny", "美元/人民币"],
+    ["^N225", "nikkei225", "日经225"],
+    ["^KS200", "kospi200", "KOSPI200"],
+    ["^SOX", "sox", "费城半导体指数"],
+    ["HSTECH.HK", "hstech", "恒生科技指数"],
+    ["000001.SS", "sse", "上证综指"],
+    ["000300.SS", "csi300", "沪深300"],
+    ["000905.SS", "csi500", "中证500"],
+    ["GC=F", "gold", "黄金"],
+    ["CL=F", "wti", "WTI原油"],
+    ["BTC-USD", "bitcoin", "比特币"],
+    ["ETH-USD", "ethereum", "以太币"],
+  ];
+  const metrics = [];
+  for (let offset = 0; offset < definitions.length; offset += 4) {
+    const batch = definitions.slice(offset, offset + 4);
+    const results = await Promise.allSettled(batch.map(([symbol, id, label]) => metricFromYahoo(symbol, id, label)));
+    metrics.push(...results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : [])));
+  }
+  return metrics;
 }
 
 function wiseStatus(value) {
@@ -1006,7 +1023,7 @@ async function buildDashboardSnapshot() {
       source: SOURCE_LABEL,
       asOf: generatedAt,
       generatedAt,
-      version: 3,
+      version: 4,
       universeVersion: UNIVERSE_VERSION,
       sourceUrls: [
         "https://fund.eastmoney.com/",
