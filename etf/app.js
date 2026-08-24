@@ -683,12 +683,6 @@
   elements.exportButton.addEventListener("click", exportCsv);
   elements.clearCompare.addEventListener("click", () => { state.compare.clear(); persistSet("51vipai-etf-compare", state.compare); renderTable(); });
   elements.openCompare.addEventListener("click", openComparison);
-  elements.themeButton.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    try { localStorage.setItem("51vipai-theme", document.body.classList.contains("dark") ? "dark" : "light"); } catch { /* ignore */ }
-  });
-
-  try { document.body.classList.toggle("dark", localStorage.getItem("51vipai-theme") === "dark"); } catch { /* ignore */ }
   renderTabs();
   loadData();
 })();
