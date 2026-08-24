@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="../etf/styles.css?v=expanded-ticker-20260824" />
     <link rel="stylesheet" href="us-roadmap.css?v=20260824" />
+    <link rel="stylesheet" href="us-tools.css?v=20260825" />
   </head>
   <body class="category-page" data-category="us-stocks">
     <header class="etf-header unified-header">
@@ -23,6 +24,18 @@
       </nav>
     </header>
     <main class="category-layout">
+      <section class="us-tools-menu" aria-label="美股实用工具">
+        <button class="us-tools-trigger" id="us-tools-trigger" type="button" aria-expanded="false" aria-controls="us-tools-dropdown">
+          <span><small>US STOCKS TOOLKIT</small><b>实用工具</b></span><i>⌄</i>
+        </button>
+        <nav class="us-tools-dropdown" id="us-tools-dropdown" hidden>
+          <a href="../tools/coming-soon/?tool=bank"><span>01</span><b>开银行卡</b><small>待上线</small></a>
+          <a href="../tools/coming-soon/?tool=broker"><span>02</span><b>开美股券商账户</b><small>待上线</small></a>
+          <a href="../tools/coming-soon/?tool=remittance"><span>03</span><b>跨境汇款</b><small>待上线</small></a>
+          <a href="../tools/coming-soon/?tool=funding"><span>04</span><b>券商出入金</b><small>待上线</small></a>
+          <a class="ready" href="../tools/dca-calculator/"><span>05</span><b>定投 DCA 计算器</b><small>立即使用 →</small></a>
+        </nav>
+      </section>
       <header class="category-header">
         <p class="eyebrow">Category</p>
         <h1 id="category-page-title">美股</h1>
@@ -41,6 +54,7 @@
     <script src="../content.js"></script>
     <script src="../category.js"></script>
     <script src="us-roadmap.js?v=20260824"></script>
+    <script src="us-tools.js?v=20260825"></script>
     <script src="../site-ui.js"></script>
     <script src="../market-ticker.js?v=expanded-ticker-20260824"></script>
     <script src="/feedback-widget.js?v=roadmap-20260824"></script>

@@ -1347,6 +1347,90 @@ async function health(env) {
   return json({ status: database === "ok" ? "ok" : "degraded", services: { database }, checkedAt: new Date().toISOString() });
 }
 
+async function fetchYahooHistory(symbol, start, end) {
+  const encoded = encodeURIComponent(symbol);
+  const period1 = Math.floor(new Date(`${start}T00:00:00Z`).getTime() / 1000);
+  const period2 = Math.floor(new Date(`${end}T23:59:59Z`).getTime() / 1000) + 86400;
+  let lastError;
+  for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
+    try {
+      const payload = await fetchJson(`https://${host}/v8/finance/chart/${encoded}?period1=${period1}&period2=${period2}&interval=1d&events=div%2Csplits`, { headers: { accept: "application/json" } });
+      const result = payload?.chart?.result?.[0];
+      const timestamps = result?.timestamp || [];
+      const adjusted = result?.indicators?.adjclose?.[0]?.adjclose || [];
+      const closes = result?.indicators?.quote?.[0]?.close || [];
+      const rows = timestamps.map((timestamp, index) => ({ date: new Date(timestamp * 1000).toISOString().slice(0, 10), price: Number(adjusted[index] ?? closes[index]) })).filter((row) => row.date >= start && row.date <= end && Number.isFinite(row.price) && row.price > 0);
+      if (rows.length < 2) throw new Error(`Yahoo 没有返回 ${symbol} 的有效历史行情`);
+      return rows;
+    } catch (error) { lastError = error; }
+  }
+  throw lastError || new Error(`无法获取 ${symbol} 历史行情`);
+}
+
+function latestPriceAt(rows, date, cursor) {
+  while (cursor.index + 1 < rows.length && rows[cursor.index + 1].date <= date) cursor.index += 1;
+  const row = rows[cursor.index];
+  return row && row.date <= date ? row.price : null;
+}
+
+async function dcaBacktest(request) {
+  const contentType = request.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) return errorResponse(415, "UNSUPPORTED_MEDIA_TYPE", "请使用 JSON 提交回测参数。");
+  let body;
+  try { body = await request.json(); } catch { return errorResponse(400, "INVALID_JSON", "回测参数格式不正确。"); }
+  const assets = Array.isArray(body.assets) ? body.assets.slice(0, 8).map((asset) => ({ symbol: String(asset.symbol || "").trim().toUpperCase(), name: String(asset.name || "").trim().slice(0, 80), weight: Number(asset.weight) })) : [];
+  const symbolPattern = /^[A-Z0-9.^=_-]{1,20}$/;
+  const totalWeight = assets.reduce((sum, asset) => sum + asset.weight, 0);
+  if (!assets.length || new Set(assets.map((asset) => asset.symbol)).size !== assets.length || assets.some((asset) => !symbolPattern.test(asset.symbol) || !Number.isFinite(asset.weight) || asset.weight <= 0) || Math.abs(totalWeight - 100) > .05) return errorResponse(400, "INVALID_ASSETS", "请提供 1 至 8 个代码不重复的有效资产，且权重合计为 100%。");
+  const start = String(body.start || ""), end = String(body.end || "");
+  const startTime = new Date(`${start}T00:00:00Z`).getTime(), endTime = new Date(`${end}T00:00:00Z`).getTime();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || !Number.isFinite(startTime) || !Number.isFinite(endTime) || startTime >= endTime || endTime - startTime > 35 * 365.25 * 86400000) return errorResponse(400, "INVALID_DATES", "请选择有效且不超过 35 年的回测日期。");
+  const initial = Number(body.initial), recurring = Number(body.recurring);
+  if (![initial, recurring].every((value) => Number.isFinite(value) && value >= 0 && value <= 100000000) || initial + recurring <= 0) return errorResponse(400, "INVALID_CASHFLOW", "投入金额无效。");
+  const frequency = body.frequency === "weekly" ? "weekly" : "monthly";
+  const rebalance = body.rebalance === "none" ? "none" : "annual";
+  const benchmark = String(body.benchmark || "SPY").trim().toUpperCase();
+  if (!symbolPattern.test(benchmark)) return errorResponse(400, "INVALID_BENCHMARK", "对比基准代码无效。");
+
+  try {
+    const symbols = [...new Set([...assets.map((asset) => asset.symbol), benchmark])];
+    const results = await Promise.all(symbols.map(async (symbol) => [symbol, await fetchYahooHistory(symbol, start, end)]));
+    const histories = Object.fromEntries(results);
+    const calendar = histories[assets[0].symbol].map((row) => row.date);
+    const cursors = Object.fromEntries(symbols.map((symbol) => [symbol, { index: 0 }]));
+    const shares = Object.fromEntries(assets.map((asset) => [asset.symbol, 0]));
+    let benchmarkShares = 0, invested = 0, peak = 0, maxDrawdownPct = 0, previousEvent = null, previousYear = null, initialized = false;
+    const timeline = [];
+    for (const date of calendar) {
+      const prices = Object.fromEntries(symbols.map((symbol) => [symbol, latestPriceAt(histories[symbol], date, cursors[symbol])]));
+      if (symbols.some((symbol) => !prices[symbol])) continue;
+      const month = date.slice(0, 7), year = date.slice(0, 4);
+      const elapsed = previousEvent ? (new Date(date) - new Date(previousEvent)) / 86400000 : Infinity;
+      const contribution = !initialized ? initial : ((frequency === "monthly" ? previousEvent?.slice(0, 7) !== month : elapsed >= 7) ? recurring : 0);
+      initialized = true;
+      if (contribution > 0) {
+        assets.forEach((asset) => { shares[asset.symbol] += contribution * asset.weight / 100 / prices[asset.symbol]; });
+        benchmarkShares += contribution / prices[benchmark]; invested += contribution; previousEvent = date;
+      }
+      if (rebalance === "annual" && previousYear && year !== previousYear) {
+        const value = assets.reduce((sum, asset) => sum + shares[asset.symbol] * prices[asset.symbol], 0);
+        assets.forEach((asset) => { shares[asset.symbol] = value * asset.weight / 100 / prices[asset.symbol]; });
+      }
+      previousYear = year;
+      const portfolio = assets.reduce((sum, asset) => sum + shares[asset.symbol] * prices[asset.symbol], 0);
+      const benchmarkValue = benchmarkShares * prices[benchmark];
+      peak = Math.max(peak, portfolio); if (peak > 0) maxDrawdownPct = Math.min(maxDrawdownPct, (portfolio / peak - 1) * 100);
+      if (!timeline.length || timeline.at(-1).date.slice(0, 7) !== month) timeline.push({ date, invested: Math.round(invested * 100) / 100, portfolio: Math.round(portfolio * 100) / 100, benchmark: Math.round(benchmarkValue * 100) / 100 });
+      else timeline[timeline.length - 1] = { date, invested: Math.round(invested * 100) / 100, portfolio: Math.round(portfolio * 100) / 100, benchmark: Math.round(benchmarkValue * 100) / 100 };
+    }
+    if (!timeline.length || invested <= 0) throw new Error("所选日期内没有足够的共同交易日");
+    const last = timeline.at(-1), years = Math.max((new Date(last.date) - new Date(timeline[0].date)) / (365.25 * 86400000), 1 / 365.25);
+    const profit = last.portfolio - invested, returnPct = profit / invested * 100;
+    const annualizedPct = ((last.portfolio / invested) ** (1 / years) - 1) * 100;
+    return json({ data: { invested, finalValue: last.portfolio, profit, returnPct, annualizedPct, maxDrawdownPct, benchmark, benchmarkValue: last.benchmark, benchmarkReturnPct: (last.benchmark - invested) / invested * 100, timeline }, meta: { source: "Yahoo Finance 复权历史行情", asOf: last.date, generatedAt: new Date().toISOString(), methodology: "按所选频率投入，支持碎股与年度再平衡；年化收益为累计投入基础上的简化估算。" } });
+  } catch (error) { return errorResponse(503, "HISTORY_UNAVAILABLE", "历史行情暂时不可用。", { reason: error.message }); }
+}
+
 async function submitFeedback(request, env) {
   if (!env.DB) return errorResponse(503, "DATABASE_UNAVAILABLE", "反馈服务暂时不可用，请稍后再试。");
   const contentType = request.headers.get("content-type") || "";
@@ -1423,6 +1507,7 @@ export default {
       return new Response(null, { status: 204, headers: { allow: "GET, HEAD, POST, OPTIONS" } });
     }
     if (url.pathname === "/api/v1/feedback" && request.method === "POST") return submitFeedback(request, env);
+    if (url.pathname === "/api/v1/dca/backtest" && request.method === "POST") return dcaBacktest(request);
     if (!["GET", "HEAD"].includes(request.method)) {
       return errorResponse(405, "METHOD_NOT_ALLOWED", "Method not supported.", { allow: ["GET", "HEAD", "POST"] });
     }

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --test-scheduled --persist-to /tmp/51vipai-wrangler-state",
-    "check": "node --check worker/src/index.js && node --check etf/app.js && node --check etf/config.js && node --check lazy/lazy.js",
+    "check": "node --check worker/src/index.js && node --check etf/app.js && node --check etf/config.js && node --check lazy/lazy.js && node --check categories/us-tools.js && node --check tools/dca-calculator/dca.js && node --check tools/coming-soon/coming-soon.js",
     "db:migrate:local": "wrangler d1 migrations apply 51vipai-etf --local",
     "db:migrate:remote": "wrangler d1 migrations apply 51vipai-etf --remote",
     "deploy": "wrangler deploy"

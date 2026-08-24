@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>DCA 定投计算器 | 51VIPAI</title><meta name="description" content="支持多资产历史回测、固定收益估算和历史案例的 DCA 定投计算器。"/><link rel="canonical" href="https://www.51vipai.com/tools/dca-calculator/"/><link rel="stylesheet" href="../../etf/styles.css?v=dca-20260825"/><link rel="stylesheet" href="dca.css?v=20260825"/></head>
+<body><header class="etf-header unified-header"><nav class="etf-nav"><a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>DCA CALCULATOR</small></a><div class="etf-nav-links"><a href="../../index.html">首页</a><a class="active" href="../../categories/us-stocks.html">美股</a><a href="../../categories/ai.html">AI</a><a href="../../etf/">ETF</a></div><button class="theme-button" id="theme-button" type="button">◐</button></nav></header>
+<main class="dca-shell">
+  <header class="dca-head"><div><p class="eyebrow">FREE INVESTMENT TOOL</p><h1>DCA 定投计算器</h1><p>测算多资产定投历史表现，或用固定年化收益率估算长期复利。所有结果仅供教育参考。</p></div><button id="history-button" class="outline-button" type="button">我的历史</button></header>
+  <section class="dca-app">
+    <div class="dca-tabs" role="tablist"><button role="tab" aria-selected="true" data-mode="portfolio">投资组合测算</button><button role="tab" aria-selected="false" data-mode="fixed">固定收益估算</button><button role="tab" aria-selected="false" data-mode="cases">历史案例收益</button></div>
+    <section class="dca-panel" data-panel="portfolio">
+      <div class="panel-heading"><div><p class="eyebrow">PORTFOLIO</p><h2>资产配置</h2></div><strong id="weight-total">合计 100.0%</strong></div>
+      <div class="asset-list" id="asset-list"></div>
+      <div class="asset-actions"><button type="button" id="add-asset">＋ 添加资产</button><button type="button" id="equal-weight">等权分配</button><button type="button" id="clear-assets">清空配置</button></div>
+      <form class="parameter-grid" id="portfolio-form">
+        <label><span>开始日期</span><input name="start" type="date" value="2016-01-01" required/></label><label><span>结束日期</span><input name="end" type="date" value="2026-01-01" required/></label>
+        <label><span>初始投入</span><input name="initial" type="number" min="0" step="100" value="5000" required/></label><label><span>每期定投</span><input name="recurring" type="number" min="0" step="50" value="500" required/></label>
+        <label><span>定投频率</span><select name="frequency"><option value="monthly">每月定投</option><option value="weekly">每周定投</option></select></label><label><span>对比基准</span><input name="benchmark" value="SPY" maxlength="20" required/></label>
+        <label><span>再平衡</span><select name="rebalance"><option value="annual">每年</option><option value="none">不再平衡</option></select></label>
+        <div class="form-note">历史回测使用 Yahoo Finance 延迟行情；税费、滑点、汇率和分红口径可能改变实际结果。</div>
+        <button class="run-button" type="submit">运行组合回测</button>
+      </form>
+      <div class="dca-result" id="portfolio-result"><p class="result-placeholder">配置资产与参数后运行回测</p></div>
+    </section>
+    <section class="dca-panel" data-panel="fixed" hidden>
+      <div class="panel-heading"><div><p class="eyebrow">COMPOUNDING</p><h2>固定收益率参数</h2></div></div>
+      <form class="parameter-grid fixed-grid" id="fixed-form"><label><span>定投频率</span><select name="frequency"><option value="monthly">每月定投</option><option value="weekly">每周定投</option><option value="yearly">每年定投</option></select></label><label><span>起始投资金额</span><input name="initial" type="number" min="0" value="0" required/></label><label><span>每期定投金额</span><input name="recurring" type="number" min="0" value="1000" required/></label><label><span>投资年限</span><input name="years" type="number" min="1" max="60" value="10" required/></label><label><span>预期年化收益率 (%)</span><input name="annualRate" type="number" min="-50" max="100" step="0.1" value="7" required/></label><button class="run-button" type="submit">计算投资收益</button></form>
+      <div class="dca-result" id="fixed-result"><p class="result-placeholder">输入投资参数并点击计算按钮查看结果</p></div>
+    </section>
+    <section class="dca-panel" data-panel="cases" hidden><div class="panel-heading"><div><p class="eyebrow">HISTORICAL CASES</p><h2>历史案例收益</h2><p>以下是用于理解定投节奏和波动的教育案例，不是实时回测或未来承诺。</p></div></div><div class="case-switcher" id="case-switcher"></div><div id="case-detail"></div></section>
+  </section>
+  <p class="dca-disclaimer">风险提示：历史表现不代表未来收益。计算结果未完整计入税费、交易成本、汇率变化、分红税和产品跟踪误差，不构成投资建议。</p>
+</main>
+<dialog id="history-dialog" class="history-dialog"><div><header><h2>我的计算历史</h2><button type="button" id="close-history">×</button></header><div id="history-list"></div></div></dialog>
+<script src="../../site-ui.js"></script><script src="../../market-ticker.js?v=expanded-ticker-20260824"></script><script src="dca.js?v=20260825"></script><script src="/feedback-widget.js?v=roadmap-20260824"></script></body></html>
