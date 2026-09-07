@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mozilla-ai/llamafile 评测 | 51VIPAI</title>
+    <meta name="description" content="把一个大模型和运行它需要的一切，打包成单独一个文件" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>mozilla-ai/llamafile</h1>
+        <p><a href="https://github.com/mozilla-ai/llamafile">https://github.com/mozilla-ai/llamafile</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/mozilla-ai/llamafile">mozilla-ai/llamafile</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>25,897 star / 1,602 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>C++</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2023-09-10</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-03</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（3 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>⚠️ 未声明许可证 —— 默认保留全部权利，商用前务必确认</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>216 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p><strong>把一个大模型和运行它需要的一切，打包成单独一个文件。双击就跑，不用安装任何东西。</strong></p>
+<p>这有多反常识？平时你想在本地跑一个模型，得先装运行环境、装依赖、下模型、配路径，一路踩坑。llamafile 把这一整套压缩成：<strong>下载一个文件，运行它，完事。</strong> 而且同一个文件在 Windows、macOS、Linux 上都能跑——不用为每个系统准备不同版本。</p>
+<p>它是 Mozilla 的项目（Mozilla Builders 发起，现在由 Mozilla.ai 接手重做）。技术上是把 llama.cpp（跑模型的引擎）和 Cosmopolitan Libc（一种能让同一个可执行文件跨系统运行的技术）拼在一起做到的。</p>
+<p>典型用法：</p>
+<ul>
+<li><strong>给完全不懂技术的人一个本地 AI</strong>：发一个文件过去，让他双击。没有比这更低的门槛了</li>
+<li><strong>在不能联网、不能装软件的机器上跑模型</strong>：比如内网、客户现场</li>
+<li><strong>归档一个模型</strong>：一个文件就是完整的、可运行的快照，几年后拿出来照样能跑</li>
+<li><strong>语音转文字</strong>：它还附带一个 <code>whisperfile</code>，同样是单文件，基于 whisper.cpp，转写和翻译音频都不用装东西</li>
+</ul>
+<p><strong>两件要注意的事：</strong></p>
+<p><strong>一、许可证在 GitHub 上显示为"未声明标准许可证"。</strong> 它是多个开源组件拼起来的，授权情况比较复杂。<strong>自己用没问题，商用前务必点进仓库看清楚 LICENSE 文件。</strong></p>
+<p><strong>二、0.10 版换了构建方式，可能缺功能。</strong> README 自己说得很直白：新版能支持更新的模型，<strong>但可能少了一些你习惯的功能</strong>；喜欢"经典体验"的可以去下载旧版本。<strong>所以装之前先想清楚你要的是新模型支持还是功能完整</strong>——这两件事目前不可兼得。</p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>2023 年想在本地跑一个大模型，流程大概是：装 Python、装依赖、下模型、配路径、解决版本冲突、再折腾显卡驱动。<strong>对非程序员基本等于劝退</strong>，对程序员也是半天起步。</p>
+<p>llamafile 的答案简单粗暴：<strong>把模型和运行环境打包成一个文件，双击就跑。</strong> 而且<strong>同一个文件在 Windows、macOS、Linux 上都能用</strong>——这在软件分发上是很反直觉的一件事，靠的是一个叫 Cosmopolitan Libc 的技术。</p>
+<p><strong>它是怎么来的</strong></p>
+<p>Mozilla Builders 在 2023 年 11 月<a href="https://hacks.mozilla.org/2023/11/introducing-llamafile/">发起的项目</a>。核心思路是 llama.cpp（跑模型的引擎）+ Cosmopolitan Libc（跨系统可执行文件）。</p>
+<p><strong>但中间沉寂过一段，这一点必须说。</strong></p>
+<p>Mozilla.ai 的博客文章标题就叫<a href="https://blog.mozilla.ai/llamafile-returns/">「llamafile 回来了」</a>——<strong>用"回来了"这个词，说明它曾经停滞过。</strong> 原因是本地模型生态跑得太快，llama.cpp 一直在更新，而 llamafile 没跟上，导致新模型跑不了。Mozilla.ai 接手后做了重构。</p>
+<p>2026 年 3 月发布的 <a href="https://www.helpnetsecurity.com/2026/03/20/llamafile-0-10-0-released/">0.10.0 版本是从头重建了核心</a>，加了显卡支持。</p>
+<p><strong>大家在夸什么</strong></p>
+<p>分发简单到没有对手：给一个完全不懂技术的人发一个文件让他双击，这件事只有 llamafile 能做到。归档也好用——一个文件就是完整可运行的快照。</p>
+<p><strong>大家在骂什么 / 三个真实的限制</strong></p>
+<ol>
+<li><strong>Windows 上有 4 GB 的可执行文件大小上限</strong>，而<strong>现成的那些 llamafile 大多超过这个数</strong>。这是操作系统的硬限制，绕的方式是把模型和运行程序分开，但那就失去了"单文件"的意义。<strong>如果你主力是 Windows，这条可能直接让它不成立。</strong></li>
+<li><strong>每个模型是一个独立进程</strong>。想同时跑几个模型，得自己管理多个进程——Ollama 那种统一管理的体验它没有。</li>
+<li><strong>生态差距明显</strong>。Ollama 的星数大约是它的四倍，第三方工具和教程也多得多。<strong>遇到问题时能搜到的答案数量差一个量级。</strong></li>
+<li><strong>0.10 版可能缺功能</strong>。README 自己说：新版支持更新的模型，但可能少了你习惯的一些功能，想要"经典体验"得去下旧版。</li>
+</ol>
+<p><strong>已有的评测</strong></p>
+<ul>
+<li><a href="https://www.helpnetsecurity.com/2026/03/20/llamafile-0-10-0-released/">Mozilla 的便携 LLM 运行器获得 GPU 支持和重建的核心</a>（英文，讲 0.10 重构）</li>
+<li><a href="https://www.kunalganglani.com/blog/ollama-vs-llamafile">Ollama vs Llamafile 2026 对比</a>（英文，含上面几条限制）</li>
+<li><a href="https://docs.mozilla.ai/llamafile">官方文档</a></li>
+<li><a href="https://blog.mozilla.ai/llamafile-returns/">llamafile 回来了</a>（Mozilla.ai 官方，讲接手经过）</li>
+</ul>
+<p>中文的深度评测我这次没有检索到。</p>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>定位</th>
+<th>关键差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>llamafile</strong></td>
+<td>25,897</td>
+<td>2026-09-03</td>
+<td><strong>单文件分发</strong></td>
+<td>一个文件 = 模型 + 运行环境，双击就跑，跨系统</td>
+</tr>
+<tr>
+<td>ollama/ollama</td>
+<td>180,354</td>
+<td>2026-09-05</td>
+<td>本地模型管理器</td>
+<td><strong>生态大 7 倍</strong>，装一次管所有模型，教程铺天盖地</td>
+</tr>
+<tr>
+<td>open-webui/open-webui</td>
+<td>151,175</td>
+<td>2026-09-07</td>
+<td>聊天界面</td>
+<td>给本地模型套一个像 ChatGPT 的网页界面</td>
+</tr>
+<tr>
+<td>ggml-org/llama.cpp</td>
+<td>25,897</td>
+<td>2026-09-03</td>
+<td>底层引擎</td>
+<td><strong>llamafile 和 ollama 都建在它上面</strong></td>
+</tr>
+<tr>
+<td>Mintplex-Labs/anything-llm</td>
+<td>65,714</td>
+<td>2026-09-04</td>
+<td>本地知识库</td>
+<td>侧重把你的文档喂给模型</td>
+</tr>
+<tr>
+<td>LostRuins/koboldcpp</td>
+<td>11,627</td>
+<td>2026-09-06</td>
+<td>单文件运行器</td>
+<td>思路最接近，但偏创意写作/角色扮演；AGPL 许可证</td>
+</tr>
+</tbody>
+</table></div>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>你要把一个能用的 AI 发给一个完全不懂技术的人</strong> → <strong>只有 llamafile 能做到</strong>。发一个文件、让他双击，没有第二个方案能做到这一步。这是它无可替代的场景。</li>
+<li><strong>你要在不能联网、不能装软件的机器上跑模型</strong>（内网、客户现场）→ 同上。</li>
+<li><strong>你要归档一个模型</strong>，几年后还能原样跑起来 → 单文件快照，llamafile 最合适。</li>
+<li><strong>除此之外的日常本地跑模型</strong> → <strong>老实说，选 ollama。</strong> 生态大 7 倍、教程多一个量级、多模型统一管理、遇到问题搜得到答案。llamafile 的"每个模型一个独立进程"在日常使用中是负担不是优点。</li>
+<li><strong>你主力是 Windows</strong> → <strong>这条可能直接否掉它</strong>：Windows 有 4 GB 可执行文件上限，而现成的 llamafile 大多超过这个数。</li>
+<li><strong>只想要个聊天界面</strong> → open-webui 更对症，它是界面不是运行器，可以配合 ollama 用。</li>
+</ul>
+<p>一句话：<strong>llamafile 是一把非常特别的钥匙，但只开一把锁——"零安装分发"。</strong> 那把锁很值钱（没有替代品），但如果你要的不是那把锁，ollama 是更省心的选择。</p>
+<p><strong>顺带一个可以直接引用的判断</strong>：llamafile、ollama、koboldcpp <strong>底下跑的都是 llama.cpp</strong>。也就是说它们的推理速度和模型支持大同小异，<strong>真正的差别全在"怎么分发、怎么管理"这一层</strong>。理解这一点，选型就简单多了。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>Windows 上那个 4 GB 限制到底多致命</strong>（最值得验）。去下载几个官方现成的 llamafile，看看有几个超过 4 GB。<strong>如果大部分都超了，那"单文件"这个卖点在 Windows 上基本不成立</strong>——这个结论很有冲击力，而且我没看到有人明确说过。</li>
+<li><strong>0.10 版到底缺了什么</strong>。README 承认新版可能少功能、建议怀旧的人用旧版，但<strong>没有列清单</strong>。装 0.10 和旧版各跑一遍，找出差异——这是实打实的信息缺口。</li>
+<li><strong>和 ollama 比，速度差多少</strong>。两个底下都是 llama.cpp，理论上应该差不多。<strong>如果实测差很多，那说明打包方式有性能代价，这很值得讲。</strong></li>
+<li><strong>真找个不懂技术的人试一次</strong>。这是它唯一的护城河，但没人验证过。找个家人或非技术同事，发个文件让他双击，看他能不能自己跑起来、卡在哪一步。<strong>这个实验最能说明问题，也最有画面感。</strong></li>
+<li><strong>许可证到底是什么</strong>。GitHub 显示"未声明标准许可证"，点进仓库看 LICENSE，确认商用边界。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><em>还没有亲自试过这个工具。</em></p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

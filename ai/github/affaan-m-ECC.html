@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>affaan-m/ECC 评测 | 51VIPAI</title>
+    <meta name="description" content="给你已经在用的 AI 编程助手（Claude Code、Codex、Cursor 这些）装一套完整的工程流程，让它不再是&quot;你说一句它写一段&quot;，而是按规矩干活" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>affaan-m/ECC</h1>
+        <p><a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/affaan-m/ECC">affaan-m/ECC</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>251,991 star / 37,844 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>JavaScript</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2026-01-18</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-07</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（0 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>MIT（宽松许可证，商用一般没问题）</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>178 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p>给你已经在用的 AI 编程助手（Claude Code、Codex、Cursor 这些）装一套完整的工程流程，让它不再是"你说一句它写一段"，而是按规矩干活。</p>
+<p>它把一套开发流程固化了下来：<strong>先规划 → 写测试 → 再实现 → 换个干净的上下文自我审查 → 验证 → 记下来 → 沉淀成可复用的能力</strong>。你不用每次开新对话都把这套要求重新交代一遍，装一次就变成它的默认工作方式。</p>
+<p>具体带来的东西：<strong>68 个专职 agent</strong>（规划、审查、修构建、安全、架构）、<strong>286 个技能</strong>（测试驱动开发、调研、安全、文档、前端、数据、机器学习……）、94 个命令，外加记忆、钩子、持续学习和一套叫 AgentShield 的安全扫描。</p>
+<p>典型的用法：</p>
+<ul>
+<li><strong>做一个新功能</strong>：<code>/ecc:plan "描述功能"</code>，它先出方案再动手，而不是直接闷头写</li>
+<li><strong>长会话要结束了</strong>：<code>/save-session</code> 存档，下次 <code>/resume-session</code> 接着干——<strong>上下文不用从头喂</strong></li>
+<li><strong>担心上下文快满了</strong>：<code>/context-budget</code> 看一眼还剩多少余量</li>
+<li><strong>检查 AI 配置有没有安全隐患</strong>：<code>/security-scan</code> 扫提示词注入、钩子、MCP 配置、泄漏的密钥</li>
+<li><strong>代码写完想找人审</strong>：<code>/code-review</code> 开一个干净上下文来挑毛病，避免"自己写的自己看不出问题"</li>
+</ul>
+<p>两个用之前该知道的事：</p>
+<p><strong>一、它对 Claude Code 支持最好</strong>，Codex 有正式的同步路径，Cursor、OpenCode、Gemini、Zed、Copilot 这些是"能力受限的适配器"——README 里专门有张支持矩阵，别默认功能一样。</p>
+<p><strong>二、开源部分是 MIT，永久免费；但有个付费版</strong>（托管的 GitHub App，私有仓库每人每月 19 美元）。作者写得很直白：正是赞助和 Pro 订阅在养这个项目，所以一个人能同时维护 7 个 harness。</p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>用过 Claude Code 的人都遇到过同一件事：它写代码很快，但<strong>不按工程规矩来</strong>——不先规划就动手、不写测试、自己写的自己审不出问题、换个会话就把前面的事忘光。于是你每次都得在提示词里重新交代"先出方案""记得写测试""审一遍"。</p>
+<p>ECC 的思路是：<strong>把这套规矩装进去一次，别每次重说。</strong></p>
+<p><strong>它是怎么来的</strong></p>
+<p>作者是 Affaan Mustafa，据报道这套东西是他自己日常用了十个多月演化出来的，一开始只是个人的配置包。他和队友还拿过 Anthropic 和 Forum Ventures 在纽约办的黑客松冠军——8 小时用 Claude Code 做出了 zenith.chat，赢了 1.5 万美元的 API 额度。</p>
+<p><strong>什么时候火的</strong></p>
+<p>极快。README 里那张 star 曲线图自己标着：<strong>2026 年 1 月 18 日到 2 月 7 日，三周涨了 4 万星</strong>。仓库是 1 月 18 日建的——也就是说，<strong>一建立就开始爆</strong>。到现在（9 月）25 万星。</p>
+<p>引爆点据 <a href="https://medium.com/@tentenco/everything-claude-code-inside-the-82k-star-agent-harness-thats-dividing-the-developer-community-4fe54feccbc1">Medium 的一篇深度报道</a>说，是 X（推特）上的一条病毒帖。</p>
+<p><strong>大家在夸什么</strong></p>
+<p>省时间，而且有学习价值——你能看到一套成熟的工程流程是怎么组织的。具体被点名夸的是它的 <code>code-reviewer</code>：<strong>只报置信度 80% 以上的问题、把相似问题合并、安全漏洞优先</strong>——这几条设计得确实讲究。</p>
+<p><strong>大家在骂什么</strong>（这段请重点看）</p>
+<p>同一篇报道的标题就叫「<strong>正在撕裂开发者社区</strong>」。三条批评反复出现，最响的是<strong>过度设计</strong>：68 个 agent、286 个技能，很多人觉得远超实际需要。</p>
+<p>但<strong>最值得你注意的是这一条质疑</strong>：</p>
+<blockquote>
+<p>一个 Claude Code 配置项目拿到这个量级的 star 很不寻常。Issues 每天都有新提交，Discussions 却几乎没人说话——<strong>这个反差说明 star 数和真实日活可能对不上</strong>。</p>
+</blockquote>
+<p>翻译成人话：<strong>很多人点了星，但未必真在用。</strong> 我自己看了它的 Discussions 区，确实冷清。</p>
+<p>还有一条实际的坑：v1.8.0 才加了 hook 的运行时控制，<strong>在那之前社区一直在抱怨 hook 冲突</strong>。README 里也专门警告：不要用两种方式重复安装，会导致技能、命令、钩子重复。</p>
+<p><strong>已有的评测</strong></p>
+<ul>
+<li><a href="https://medium.com/@tentenco/everything-claude-code-inside-the-82k-star-agent-harness-thats-dividing-the-developer-community-4fe54feccbc1">Everything Claude Code：正在撕裂开发者社区的 8.2 万星 agent harness</a>（英文，批评视角，信息量最大）</li>
+<li><a href="https://aicoding.csdn.net/6a237a2b662f9a54cb7a3592.html">20 万 Star 的 Claude Code 增强框架 ECC，我装完之后沉默了三分钟</a>（中文）</li>
+<li><a href="https://kvmboot.com/zh/blog/articles/ecc-2026-everything-claude-code-shi-fou-zhi-de-yong/ecc-2026-everything-claude-code-shi-fou-zhi-de-yong.html">ECC 值不值得用？</a>（中文）</li>
+<li><a href="https://trendshift.io/repositories/21488">Trendshift 上的增长数据</a></li>
+</ul>
+<p><strong>一句话</strong>：它解决的痛点是真的，作者也是真在用；但 25 万星这个数字<strong>不能直接当质量凭证读</strong>——那更像一次成功的传播，实际有多少人长期用，公开数据支持不了这个结论。</p>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>定位</th>
+<th>关键差异</th>
+<th>分量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ECC</strong></td>
+<td>251,902</td>
+<td>2026-09-07</td>
+<td>全套工程流程</td>
+<td>68 agent + 286 技能 + 钩子 + 记忆 + 安全扫描，<strong>一次装全</strong></td>
+<td>最重</td>
+</tr>
+<tr>
+<td>farion1231/cc-switch</td>
+<td>131,435</td>
+<td>2026-09-07</td>
+<td>桌面版配置管理器</td>
+<td>Rust 写的图形界面，在多个 AI 编程工具之间<strong>切换配置</strong></td>
+<td>轻，但定位不同</td>
+</tr>
+<tr>
+<td>thedotmack/claude-mem</td>
+<td>93,369</td>
+<td>2026-09-07</td>
+<td><strong>只做跨会话记忆</strong></td>
+<td>把会话过程压缩存下来，下次自动注入回去</td>
+<td>轻，单点做深</td>
+</tr>
+<tr>
+<td>wshobson/agents</td>
+<td>39,466</td>
+<td>2026-09-07</td>
+<td>agent 插件市场</td>
+<td><strong>按需挑几个 agent 装</strong>，不是一整套</td>
+<td>可轻可重</td>
+</tr>
+<tr>
+<td>davila7/claude-code-templates</td>
+<td>30,550</td>
+<td>2026-09-07</td>
+<td>配置 + <strong>监控</strong></td>
+<td>命令行工具，能监控 Claude Code 的运行状况</td>
+<td>中</td>
+</tr>
+<tr>
+<td>SuperClaude_Framework</td>
+<td>23,871</td>
+<td>2026-08-21</td>
+<td>轻量版全套</td>
+<td>专门命令 + "认知人格" + 开发方法论</td>
+<td>中</td>
+</tr>
+<tr>
+<td>disler/claude-code-hooks-mastery</td>
+<td>3,912</td>
+<td><strong>2026-03-04</strong> ⚠️</td>
+<td>专讲钩子怎么写</td>
+<td>教学性质</td>
+<td>最轻</td>
+</tr>
+</tbody>
+</table></div>
+<p>⚠️ 最后一个有两个实际风险：<strong>半年没更新</strong>，而且<strong>没有声明许可证</strong>——默认保留全部权利，商用前得先问作者。这是查接口查出来的。</p>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>你主力就是 Claude Code，想要一整套工程规范、不想自己拼</strong> → 选 ECC。但<strong>接受它重</strong>：68 个 agent、286 个技能不可能白装，一定会占上下文和启动时间。</li>
+<li><strong>你只想解决"换个会话就忘了前面"</strong> → 直接上 claude-mem。这是 ECC 的一小部分功能，但它单独做得更深，而且轻得多。<strong>大多数人真正的痛点其实就是这一个。</strong></li>
+<li><strong>你不想要一整套，只想挑几个好用的 agent</strong> → wshobson/agents，按需装，不绑架你。</li>
+<li><strong>你在多个 AI 工具之间来回切、配置管理很乱</strong> → cc-switch，图形界面，跟上面几个不是一回事，可以叠加使用。</li>
+<li><strong>想要 ECC 那种全套但更轻</strong> → SuperClaude_Framework，思路一样、体量只有它十分之一。</li>
+<li><strong>只是想学钩子怎么写</strong> → hooks-mastery，但注意上面那两个风险。</li>
+</ul>
+<p>一句话：<strong>ECC 的价值在"一次装全、开箱即用"，代价是重和绑定。</strong> 如果你能说清自己缺的到底是记忆、是审查还是规划，那么装对应的那一个，比装全套划算得多。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>装完之后到底多占资源</strong>（最值得验）。「过度设计」是它挨骂最多的一条，但<strong>我没找到任何一篇给出具体数字</strong>——装前装后各开一个会话，对比启动耗时和上下文占用，你就有了全网第一份数据。</li>
+<li><strong>star 数和真实使用的落差</strong>。有报道质疑：Issues 每天有新提交、Discussions 却几乎没人说话，说明点星的人未必在用。你去它的 Discussions 翻一翻，看看有多少是真实用法讨论——<strong>这个观察本身就是内容</strong>。</li>
+<li><strong>中文项目上好不好使</strong>。所有评测都是英文场景，中文注释、中文需求描述下它的规划和审查质量如何，是块空白。</li>
+<li><strong>hook 冲突修干净没有</strong>。v1.8.0 才加了钩子运行时控制，之前社区一直在抱怨冲突。装上跑几天看看还撞不撞。</li>
+<li><strong>卸载干不干净</strong>。README 专门有一节讲重置和卸载——<strong>通常只有这事真的很麻烦时才会单开一节</strong>。装之前先确认退得出来。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><em>还没有亲自试过这个工具。</em></p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

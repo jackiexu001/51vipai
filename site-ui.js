@@ -7,7 +7,8 @@
       <a href="/tools/coming-soon/?tool=remittance"><span>04</span><b>跨境汇款</b><small>待上线</small></a>
       <a href="/tools/coming-soon/?tool=funding"><span>05</span><b>券商出入金</b><small>待上线</small></a>
       <a class="ready" href="/tools/dca-calculator/"><span>06</span><b>定投 DCA 计算器</b><small>立即使用 →</small></a>`,
-    AI: '<div class="nav-menu-pending"><b>AI 功能入口规划中</b><small>COMING SOON</small></div>',
+    AI: `
+      <a class="ready" href="/ai/github/"><span>01</span><b>GitHub 热门项目评测</b><small>立即查看 →</small></a>`,
     ETF: '<div class="nav-menu-pending"><b>ETF 功能入口规划中</b><small>COMING SOON</small></div>',
   };
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");

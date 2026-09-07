@@ -59,6 +59,15 @@ const categories = {
     title: "AI",
     articles: [
       {
+        title: "GitHub 热门项目评测",
+        summary: "每个开源工具一份评测：主要用来干什么、为什么会火、同类还有谁、什么时候该选它。",
+        tag: "工具评测",
+        date: "2026.09.07",
+        image: "",
+        url: "ai/github/index.html",
+        large: true,
+      },
+      {
         title: "AI 工具地图：从使用者到创造者",
         summary: "整理常用 AI 工具、Agent、模型和工作流，形成自己的工具箱。",
         tag: "AI 工具",

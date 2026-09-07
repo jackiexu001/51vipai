@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ggml-org/whisper.cpp 评测 | 51VIPAI</title>
+    <meta name="description" content="把语音变成文字，而且是在你自己的设备上跑——不用联网，不用给任何公司发钱，录音也不离开本机" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>ggml-org/whisper.cpp</h1>
+        <p><a href="https://github.com/ggml-org/whisper.cpp">https://github.com/ggml-org/whisper.cpp</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/ggml-org/whisper.cpp">ggml-org/whisper.cpp</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>53,488 star / 6,134 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>C++</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2022-09-25</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-04</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（2 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>MIT（宽松许可证，商用一般没问题）</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>437 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p>把语音变成文字，而且是在你自己的设备上跑——不用联网，不用给任何公司发钱，录音也不离开本机。</p>
+<p>它本质上是 <strong>OpenAI 那个 Whisper 语音识别模型的"本地版"</strong>。官方版本要装一大堆 Python 依赖、还得有像样的显卡；这个用纯 C/C++ 重写了一遍，不依赖任何外部库，从 iPhone、安卓手机到树莓派、老笔记本都能跑起来。<strong>这句话就是它存在的全部理由。</strong></p>
+<p>典型的用法：</p>
+<ul>
+<li><strong>给播客、访谈录音配字幕</strong>：一段一小时的音频丢进去，出来带时间轴的字幕文件，直接拖进剪辑软件</li>
+<li><strong>会议录音转文字稿</strong>：全程离线，涉密内容不用上传到任何云服务——这是很多公司唯一能接受的方案</li>
+<li><strong>给自己做的 App 加语音输入</strong>：它提供了标准的 C 语言接口，iOS、安卓、甚至网页里都能嵌进去</li>
+<li><strong>在树莓派或旧电脑上做离线语音助手</strong>：最小的模型只占 75 MB 硬盘、不到 300 MB 内存，很老的设备也带得动</li>
+<li><strong>批量给一整个文件夹的视频加字幕</strong>：命令行工具，写个脚本就能跑一夜</li>
+</ul>
+<p>有两个实际使用时绕不开的点：它<strong>只吃 16 位 WAV 格式的音频</strong>，别的格式得先用 ffmpeg 转一道（README 里给了现成命令）；另外模型要单独下载，从 75 MB 到 2.9 GB 不等——<strong>模型越大越准，但也越吃内存</strong>，最大的那个要 3.9 GB 内存。</p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>2022 年 9 月 OpenAI 放出 Whisper 时，官方版本是个 Python 包，背后拖着整套 PyTorch——<strong>光依赖就将近 2 GB</strong>，想跑得快还得有 N 卡。这意味着两件事：普通笔记本用不了，更没法塞进一个桌面软件或手机 App 里发给用户。</p>
+<p>whisper.cpp 把整个模型用纯 C/C++ 重写了一遍，<strong>不依赖 Python、不依赖显卡</strong>，编译出来就是一个可执行文件。同一个模型，从 2 GB 的安装包变成能在 iPhone 上跑。</p>
+<p><strong>什么时候火起来的，因为什么</strong></p>
+<p>作者是 Georgi Gerganov——他后来写的 llama.cpp 更有名。让这个项目破圈的是几次"看得见"的演示：2022 年底他放出了<a href="https://news.ycombinator.com/item?id=33893478">能在浏览器里直接跑的在线 demo</a>，2023 年初<a href="https://news.ycombinator.com/item?id=34484937">整个模型跑在浏览器里的版本又上了一次 Hacker News 头版</a>。他也上过 <a href="https://changelog.com/podcast/532">Changelog 播客聊这段经历</a>。</p>
+<p><strong>为什么是它赢了</strong></p>
+<p>不是因为更准——它跑的是同一批模型权重，准确率和官方版本没有区别。赢在<strong>能跑在别人跑不了的地方</strong>：Mac 的 M 系列芯片、树莓派、手机、浏览器。</p>
+<p><strong>大家在夸什么</strong></p>
+<p>装起来简单、Apple Silicon 上速度惊人（走 Metal 和神经引擎）、能整个塞进 App 里、离线、免费。</p>
+<p><strong>大家在骂什么</strong>（这部分请重点看）</p>
+<ul>
+<li><strong>长音频上的速度存疑</strong>。有人开 issue 实测<a href="https://github.com/ggml-org/whisper.cpp/issues/3682">在较长音频上明显慢于 faster-whisper</a>，和宣传的 2–3 倍优势相反。<a href="https://github.com/ggml-org/whisper.cpp/issues/1127">另一个长期讨论帖</a>也在争这件事。结论至今不统一，<strong>跟硬件关系很大</strong>。</li>
+<li><strong>量化会掉精度</strong>。压到 4 位能省内存，但<a href="https://codersera.com/blog/faster-whisper-vs-whisper-cpp-speech-to-text-2026/">有测评指出在长录音、尤其嘈杂音频上准确率会明显下降</a>。</li>
+<li><strong>多语言表现有争议</strong>。同一篇测评提到某些多语言场景下它只转对了约四分之一内容——但这是单一来源的说法，<strong>我没找到第二处佐证，建议自己验</strong>。</li>
+<li><strong>有 N 卡的话它不是最优解</strong>。faster-whisper 在 NVIDIA 显卡上明显更快。</li>
+</ul>
+<p><strong>已有的评测和视频</strong></p>
+<ul>
+<li><a href="https://codersera.com/blog/faster-whisper-vs-whisper-cpp-speech-to-text-2026/">faster-whisper vs whisper.cpp vs OpenAI Whisper（2026）</a></li>
+<li><a href="https://github.com/ggml-org/whisper.cpp/discussions/126">项目自己的 FAQ 与路线图讨论帖</a></li>
+</ul>
+<p>中文的深度评测我这次没有检索到。</p>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>一句话定位</th>
+<th>关键差异</th>
+<th>上手难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>whisper.cpp</strong></td>
+<td>53,489</td>
+<td>2026-09-04</td>
+<td>纯 C/C++，哪儿都能跑</td>
+<td>无依赖、能进手机和浏览器、Mac 上有专门优化</td>
+<td>中（要自己编译）</td>
+</tr>
+<tr>
+<td>openai/whisper</td>
+<td>108,650</td>
+<td>2026-08-31</td>
+<td>官方原版</td>
+<td>最"正统"，但拖着近 2 GB 的 Python 依赖</td>
+<td>低（会 Python 就行）</td>
+</tr>
+<tr>
+<td>SYSTRAN/faster-whisper</td>
+<td>25,270</td>
+<td><strong>2025-11-19</strong> ⚠️</td>
+<td>N 卡上跑得快</td>
+<td>有 N 卡时速度优势明显</td>
+<td>中（要装 CUDA 那套）</td>
+</tr>
+<tr>
+<td>m-bain/whisperX</td>
+<td>23,917</td>
+<td>2026-08-30</td>
+<td><strong>能分辨谁在说话</strong></td>
+<td>词级时间轴 + 说话人分离，这两点上面几个都没有</td>
+<td>高（依赖最多）</td>
+</tr>
+<tr>
+<td>k2-fsa/sherpa-onnx</td>
+<td>14,644</td>
+<td>2026-09-05</td>
+<td>全能语音工具箱</td>
+<td>除了转文字还有语音合成、说话人分离、降噪；支持 12 种编程语言、鸿蒙和各种国产 NPU</td>
+<td>中</td>
+</tr>
+<tr>
+<td>Vaibhavs10/insanely-fast-whisper</td>
+<td>13,058</td>
+<td><strong>2025-10-25</strong> ⚠️</td>
+<td>追求极限速度</td>
+<td>是个 Notebook 形态，更像实验脚本</td>
+<td>低但不适合上生产</td>
+</tr>
+<tr>
+<td>ufal/whisper_streaming</td>
+<td>3,671</td>
+<td>2025-11-12</td>
+<td>实时流式转写</td>
+<td>边说边出字，做直播字幕用</td>
+<td>中</td>
+</tr>
+</tbody>
+</table></div>
+<p>⚠️ 标记的两个<strong>将近一年没有更新了</strong>。这是查接口查出来的，不是听说的——很多测评文章还在推荐 faster-whisper，但没告诉你它已经快一年没动静。</p>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>要离线、要塞进 App、或者用的是 Mac</strong> → <strong>选 whisper.cpp</strong>。这是它无可替代的场景，别的都做不到"编译出一个文件就能跑在 iPhone 上"。</li>
+<li><strong>有 N 卡、只在自己电脑上跑着玩</strong> → 选 openai/whisper 原版最省事，或者 faster-whisper 求速度。但<strong>要接受 faster-whisper 已近一年未更新</strong>这个事实。</li>
+<li><strong>需要区分谁在说话</strong>（会议纪要、访谈、播客多人对话）→ <strong>只能选 whisperX</strong>，上面其他几个都没这个能力。依赖多、装起来烦，但没有替代品。</li>
+<li><strong>要做嵌入式、国产芯片、或者除了转文字还要语音合成</strong> → 选 sherpa-onnx。它是几个里维护最勤的（2 天前还在更新）。</li>
+<li><strong>做直播实时字幕</strong> → whisper_streaming，虽然小众。</li>
+<li><strong>insanely-fast-whisper 不建议用于正式项目</strong>：Notebook 形态 + 近一年没更新。</li>
+</ul>
+<p>一句话：<strong>whisper.cpp 的护城河不是准确率，而是"能跑在别人跑不了的地方"。</strong> 只要你的场景不涉及离线、嵌入或 Mac，它的优势就不明显。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>长音频到底慢不慢</strong>（最值得验）。这是争议最大的地方，有人实测比 faster-whisper 慢很多，跟宣传相反，而且结论跟硬件强相关。<strong>拿一段 40 分钟以上的音频，在你自己的机器上跑一次，比读十篇测评都管用。</strong></li>
+<li><strong>中文效果</strong>（这是空白）。我检索到的测评几乎全是英文场景，中文准确率和标点处理<strong>没有一篇正经讲过</strong>。你验出来就是独家内容。</li>
+<li><strong>量化到底掉多少精度</strong>。压缩模型能省一大半内存，但有测评说长录音、嘈杂环境下会明显变差。同一段音频跑原版和量化版对比一次就知道。</li>
+<li><strong>在你的 Mac 上到底多快</strong>。Apple 芯片是它主打的优势，但没人给过具体数字。记下"多长音频花了多少秒"，这个数据很有传播力。</li>
+<li><strong>从零到跑通要多久</strong>。所有人都说"简单"，但没人给时间。你计个时——这对观众判断要不要试非常有用。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><strong>结论：有条件推荐</strong></p>
+<p>（这是走通流程用的占位心得，等你真试完再覆盖）装的时候卡在音频格式上——它只吃 16 位 WAV，mp3 要先用 ffmpeg 转一道，README 里写了但很容易漏看。转完之后 Mac 上速度确实快。</p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

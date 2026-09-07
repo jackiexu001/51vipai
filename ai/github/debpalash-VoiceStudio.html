@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>debpalash/VoiceStudio 评测 | 51VIPAI</title>
+    <meta name="description" content="在自己电脑上克隆声音、给视频配音、做有声书——对标 ElevenLabs，但完全本地、不要账号、不要 API key、没有用量限制" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>debpalash/VoiceStudio</h1>
+        <p><a href="https://github.com/debpalash/VoiceStudio">https://github.com/debpalash/VoiceStudio</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/debpalash/VoiceStudio">debpalash/VoiceStudio</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>20,133 star / 2,537 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>Python</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2026-04-09</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-07</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（0 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>AGPL-3.0（非宽松许可证，商用前请确认条款）</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>81 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p>在自己电脑上克隆声音、给视频配音、做有声书——<strong>对标 ElevenLabs，但完全本地、不要账号、不要 API key、没有用量限制。</strong></p>
+<p>作者是 Palash Debnath，前身叫 OmniVoice-Studio，现在改名 VoiceStudio。它是个桌面软件，不是给程序员用的库（但也提供接口）。</p>
+<p>它能干的事：</p>
+<ul>
+<li><strong>克隆一个人的声音</strong>：只需要 <strong>3 到 15 秒</strong>的干净参考音频</li>
+<li><strong>给视频配音</strong>：把一种语言的视频配成另一种语言</li>
+<li><strong>做有声书</strong>：长文本批量生成</li>
+<li><strong>语音输入 / 转文字</strong>：反过来把语音转成文本</li>
+<li><strong>设计声音</strong>：不是克隆现有的人，而是造一个新音色</li>
+</ul>
+<p>装了 <strong>16 个语音合成引擎 + 11 个语音识别引擎</strong>，可以随时切换；号称支持 646 种语言的合成（实际覆盖和质量取决于你选哪个引擎）。</p>
+<p>除了桌面界面，它还提供本地 REST 接口、<strong>兼容 OpenAI 格式的音频 API</strong>，以及一个 MCP 服务——也就是说<strong>可以直接接进你的 AI 工作流</strong>，这一点对你可能比图形界面更重要。</p>
+<p><strong>有三件事在动手前必须知道，我按重要性排：</strong></p>
+<p><strong>一、许可证是 AGPL-3.0，不是宽松许可证。</strong> 简单说：如果你把它接进一个对外提供服务的产品里，AGPL 会要求你把你自己的代码也开源。<strong>自己用没问题，商用前务必先想清楚。</strong>（下载的模型还各自遵守自己的条款。）</p>
+<p><strong>二、它明确标注还在 beta 阶段。</strong> README 顶部有醒目警告：正经干活请用发布版，<code>main</code> 分支随时会变。</p>
+<p><strong>三、克隆是"零样本"的，喂更多音频没用。</strong> 这一点反直觉但很重要：它不是拿你的音频去训练模型，而是把那一小段当作"提示"。<strong>所以喂 2 小时录音并不会让它更像你</strong>——超过那个短窗口的部分根本不会被用到。想提升效果，方向是"换更干净的 15 秒"，而不是"给更多素材"。</p>
+<p>硬件上：有独显最好，但<strong>显存不到 8 GB 时它会自动把合成挪到 CPU 上跑</strong>，不用你配置；纯 CPU 也能跑，只是慢。</p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>想给视频配音、做有声书、克隆一个声音，主流选择是 ElevenLabs——效果好，但两个问题绕不开：<strong>一是按月付费</strong>（据报道 5 到 330 美元/月不等），<strong>二是你的音频要传到别人服务器上</strong>。</p>
+<p>对个人创作者来说第一条是持续出血；对企业和涉密场景来说第二条直接一票否决。<strong>"能不能在自己电脑上跑"是个真需求，不是伪需求。</strong></p>
+<p><strong>为什么是它赢了</strong></p>
+<p>同类的本地方案大多是给程序员用的命令行工具或 Python 库，普通人装不起来。VoiceStudio 做成了<strong>桌面软件</strong>，Windows / macOS / Linux 都有安装包，下载即用。</p>
+<p>而且它把一堆开源引擎打包在一起（16 个合成 + 11 个识别）而不是绑定一个——你可以随时换。语言覆盖上号称 646 种，<a href="https://www.scriptbyai.com/omnivoice-studio-elevenlabs-alternative/">有报道拿它跟 ElevenLabs 的 32 种作对比</a>。</p>
+<p><strong>大家在夸什么</strong></p>
+<p>隐私、零成本、语言覆盖广、可定制。有报道总结得比较中肯：</p>
+<blockquote>
+<p>语音克隆和配音上，两者质量在多数场景下相当。ElevenLabs 赢在<strong>打磨过的云端 API 和现成音色库</strong>，VoiceStudio 赢在<strong>隐私、成本、语言覆盖和可定制性</strong>。</p>
+</blockquote>
+<p><strong>你要留心的地方</strong></p>
+<ol>
+<li><strong>AGPL-3.0 许可证。</strong> 这是我认为最该先看的一条——自己用无所谓，接进对外服务的产品会触发开源义务。</li>
+<li><strong>明确的 beta 状态。</strong> README 顶部自己挂着警告。</li>
+<li><strong>改过名。</strong> 前身 OmniVoice-Studio，网上两个名字的资料混在一起，而且<a href="https://github.com/dothesung/omnivoice-studio">还存在同名的第三方仓库</a>，别下错。</li>
+<li><strong>我没有找到成规模的负面评测。</strong> 现有报道基本都是介绍性质、偏正面。<strong>这说明深度使用者还不多</strong>——效果到底怎么样，尤其中文效果，公开资料回答不了。</li>
+</ol>
+<p><strong>已有的评测</strong></p>
+<ul>
+<li><a href="https://www.marktechpost.com/2026/05/26/meet-omnivoice-studio-a-local-open-source-alternative-to-elevenlabs/">MarkTechPost 的介绍</a>（英文）</li>
+<li><a href="https://dev.to/terminalchai/voicestudio-a-100-local-open-source-alternative-to-elevenlabs-4bd">VoiceStudio：100% 本地的 ElevenLabs 开源替代</a>（英文）</li>
+<li><a href="https://www.scriptbyai.com/omnivoice-studio-elevenlabs-alternative/">和 ElevenLabs 的对比</a>（英文，对比最详细）</li>
+<li><a href="https://voicestudio.sh/">官网 voicestudio.sh</a></li>
+</ul>
+<p>中文的深度评测我这次没有检索到。</p>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>形态</th>
+<th>许可证</th>
+<th>关键差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VoiceStudio</strong></td>
+<td>20,110</td>
+<td>2026-09-07</td>
+<td><strong>桌面软件</strong></td>
+<td>AGPL-3.0 ⚠️</td>
+<td>16 合成 + 11 识别引擎打包，克隆/配音/有声书/听写全都有</td>
+</tr>
+<tr>
+<td>coqui-ai/TTS</td>
+<td>45,983</td>
+<td><strong>2024-08-16</strong> 🛑</td>
+<td>Python 库</td>
+<td>MPL-2.0</td>
+<td>曾经的行业标杆，<strong>已停更两年</strong>（公司关门）</td>
+</tr>
+<tr>
+<td>RVC-WebUI</td>
+<td>38,161</td>
+<td>2026-08-04</td>
+<td>网页界面</td>
+<td>MIT</td>
+<td><strong>专做变声</strong>（把 A 的声音变成 B），不是文字转语音</td>
+</tr>
+<tr>
+<td>myshell-ai/OpenVoice</td>
+<td>37,467</td>
+<td><strong>2025-04-19</strong> ⚠️</td>
+<td>Python 库</td>
+<td>MIT</td>
+<td>MIT 和 MyShell 出的即时克隆，<strong>近一年半没更新</strong></td>
+</tr>
+<tr>
+<td>fishaudio/fish-speech</td>
+<td>32,580</td>
+<td>2026-08-22</td>
+<td>Python 库</td>
+<td><strong>未声明</strong> ⚠️</td>
+<td>效果公认好，但<strong>没有许可证，商用风险高</strong></td>
+</tr>
+<tr>
+<td>jianchang512/pyvideotrans</td>
+<td>18,923</td>
+<td>2026-09-06</td>
+<td>桌面软件</td>
+<td>GPL-3.0</td>
+<td><strong>国产，专做视频翻译配音</strong>，中文场景成熟</td>
+</tr>
+<tr>
+<td>SWivid/F5-TTS</td>
+<td>15,208</td>
+<td>2026-07-23</td>
+<td>Python 库</td>
+<td>MIT</td>
+<td>论文配套实现，学术出身，质量高</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>这张表最值钱的是"最近更新"和"许可证"两列</strong>，两列都是查接口得来的，博客文章不会告诉你：</p>
+<ul>
+<li><strong>coqui-ai/TTS 已经死了</strong>——2024 年 8 月最后一次更新。很多老教程还在推荐它，<strong>别再入坑</strong>。</li>
+<li><strong>OpenVoice 近一年半没动</strong>。</li>
+<li><strong>fish-speech 没有声明许可证</strong>——效果再好，商用前也得先问作者。</li>
+</ul>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>你要的是"打开就能用"的桌面软件，不想碰 Python</strong> → <strong>选 VoiceStudio</strong>（或 pyvideotrans）。这是它最大的价值，其他大多数是给程序员用的库。</li>
+<li><strong>你专门做中文视频的翻译配音</strong> → <strong>优先 pyvideotrans</strong>。国产、专注这一件事、中文场景打磨得更久，VoiceStudio 是全能选手但每一项未必最深。</li>
+<li><strong>你要接进自己的程序里</strong> → 看 F5-TTS（MIT，学术质量）或 fish-speech（效果好但<strong>许可证是坑</strong>）。</li>
+<li><strong>你要的是变声不是配音</strong>（比如把自己的录音变成另一个音色）→ 只有 RVC，上面其他几个都不做这个。</li>
+<li><strong>无论如何别选 coqui-ai/TTS</strong>——虽然它星最多、教程最多，但已经停更两年。<strong>这是"高星 ≠ 能用"最典型的例子。</strong></li>
+</ul>
+<p><strong>给你的一条实际建议</strong>：VoiceStudio 是 AGPL-3.0，如果你只是自己做视频素材，完全没问题；但如果哪天想把它包进一个对外的产品或服务，<strong>这条许可证会要求你开源自己的代码</strong>。真到那一步，F5-TTS（MIT）是更安全的地基。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>中文克隆效果到底怎么样</strong>（最值得验，也最可能出内容）。它号称 646 种语言，但<strong>所有公开评测都是英文场景</strong>。用你自己的声音录 15 秒中文，让它读一段中文，听听像不像、有没有洋腔。<strong>这个结论全网没有。</strong></li>
+<li><strong>"3–15 秒就够"是不是真的</strong>。它是零样本克隆，多喂音频没用——那 5 秒和 15 秒差别大吗？换一段更干净的音频有多大提升？<strong>验这个能直接告诉观众该怎么录素材。</strong></li>
+<li><strong>在你的 Mac 上多快</strong>。它对 Apple 芯片有专门优化，但没人给过具体数字：一段 1000 字的文本，生成要多久？</li>
+<li><strong>beta 到底有多不稳</strong>。README 自己挂了警告。连续跑几个小时的有声书任务，会不会崩、会不会漏字。</li>
+<li><strong>和 pyvideotrans 比，中文视频配音谁更好</strong>。这两个是最直接的竞争关系，而且都是桌面软件、都能装。<strong>同一个视频各跑一遍</strong>，这个对比是最有传播力的内容。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><em>还没有亲自试过这个工具。</em></p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

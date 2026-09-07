@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>thedotmack/claude-mem 评测 | 51VIPAI</title>
+    <meta name="description" content="解决一件让所有人恼火的事：换个会话，AI 就把前面的全忘了" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>thedotmack/claude-mem</h1>
+        <p><a href="https://github.com/thedotmack/claude-mem">https://github.com/thedotmack/claude-mem</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/thedotmack/claude-mem">thedotmack/claude-mem</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>93,370 star / 8,200 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>JavaScript</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2025-08-31</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-07</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（0 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>Apache-2.0（宽松许可证，商用一般没问题）</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>330 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p>解决一件让所有人恼火的事：<strong>换个会话，AI 就把前面的全忘了。</strong></p>
+<p>它在你干活的时候悄悄记录 AI 做了什么、决定了什么、下一步该干什么，用 AI 把这些压缩成摘要存起来；下次开新会话时，<strong>自动把相关的部分塞回去</strong>。你不用再手动复述"我们上次说到哪儿了"。</p>
+<p>具体会记的东西：AI 用了哪些工具、改了哪些文件、做了什么决定、还剩什么没做。它还会自动生成带活动时间线的 <code>CLAUDE.md</code> 上下文文件。</p>
+<p>典型场景：</p>
+<ul>
+<li><strong>跨天做一个功能</strong>：昨天做到一半，今天开新会话，它自己知道上下文，不用你重新交代</li>
+<li><strong>同时推几个项目</strong>：每个项目的记忆各自独立，切回去就接得上</li>
+<li><strong>回溯"当初为什么这么改"</strong>：记录里有决策过程，不只有结果</li>
+<li><strong>换工具也不丢</strong>：它不绑死 Claude Code，Codex、Gemini、Copilot、OpenCode 都能用</li>
+</ul>
+<p><strong>有两件事必须先说清楚，否则你会困惑：</strong></p>
+<p><strong>一、它改名了。</strong> README 第一行就写着「Claude-Mem 现在叫 Grok Mem」，但<strong>安装包的名字还是 <code>claude-mem</code></strong>。你在网上会同时搜到两个名字指同一个东西。这个改名意味着项目重心可能在向 Grok 生态转，值得留意。</p>
+<p><strong>二、它需要给你的会话内容做 AI 压缩。</strong> 也就是说，<strong>你干活的过程会被送去给模型处理一遍</strong>。如果你的代码涉密，这一点要先想清楚。</p>
+<p>技术上用了向量数据库和本地 SQLite 存储，支持 28 种语言的界面。</p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>这可能是 AI 编程里最普遍、也最烦人的一件事：<strong>上下文一满，或者你关掉窗口，之前所有的来龙去脉就没了。</strong> 你得重新交代项目背景、重新说清楚上次改到哪、为什么这么改。做一个跨几天的功能，光"重新对齐"就要花掉不少时间和 token。</p>
+<p>Anthropic 官方给的方案是让你手写 <code>CLAUDE.md</code>，但那是<strong>静态的</strong>——你得自己维护，而且它不知道"上次那个 bug 最后是怎么修的"。claude-mem 走的是自动路线：<strong>你干什么它记什么，需要时自己送回来。</strong></p>
+<p><strong>为什么是它赢了</strong></p>
+<p>同类里它做得最"无感"——装上就工作，不用改习惯、不用手动存档。而且<strong>不绑死一个工具</strong>：Claude Code、Codex、Gemini、Copilot、OpenCode 都能用，这在同类里少见。</p>
+<p><strong>大家在夸什么</strong></p>
+<p>跨会话真的接得上、自动生成的上下文文件有活动时间线可回溯、支持 28 种语言界面。</p>
+<p>（我原本想说"有人 fork 它接别的数据库，说明生态活跃"，但一查接口就打脸了：那个 <a href="https://github.com/customable/claude-mem">customable/claude-mem</a> 只有 4 个星、2026 年 1 月之后再没更新过。<strong>所谓生态并不存在。</strong>）</p>
+<p><strong>你必须留心的三件事</strong></p>
+<ol>
+<li><strong>它改名了，而且改得有点尴尬。</strong> README 第一行写着「Claude-Mem 现在叫 Grok Mem」，但包名还是 <code>claude-mem</code>。你搜资料会撞见两个名字。更值得琢磨的是：<strong>一个叫 Claude-Mem 的项目改名叫 Grok Mem，说明重心可能在往 Grok 生态转</strong>——如果你主力是 Claude Code，这个方向变化值得盯着。</li>
+<li><strong>你的工作过程会被送去给 AI 压缩。</strong> 这是它的工作原理决定的，不是 bug。涉密代码要先想清楚。</li>
+<li><strong>我没有找到成规模的批评。</strong> 这既可能是真没槽点，也可能是深度使用者还不够多。<strong>别把"没找到差评"读成"没有问题"。</strong></li>
+</ol>
+<p><strong>已有的评测和资料</strong></p>
+<ul>
+<li><a href="https://docs.claude-mem.ai/introduction">官方文档站</a></li>
+<li><a href="https://www.datacamp.com/tutorial/claude-mem-guide">DataCamp 的上手教程</a>（英文，结构清楚）</li>
+<li><a href="https://www.heyuan110.com/posts/ai/2026-02-03-claude-mem-deep-dive/">Claude-Mem 深度剖析</a>（中文，讲原理）</li>
+<li><a href="https://github.com/thedotmack/claude-mem/blob/main/docs/i18n/README.zh.md">项目自己的中文 README</a></li>
+<li><a href="https://medium.com/@n913239/hooks-memory-%E8%AE%93-claude-code-%E8%87%AA%E5%8B%95%E5%8F%8D%E6%87%89-%E9%95%B7%E6%9C%9F%E8%A8%98%E6%86%B6-bc9e107116e8">Hooks + Memory：让 Claude Code 自动反应、长期记忆</a>（繁体中文）</li>
+</ul>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>定位</th>
+<th>关键差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>claude-mem</strong></td>
+<td>93,369</td>
+<td>2026-09-07</td>
+<td>AI 编程助手的跨会话记忆</td>
+<td>自动记录 + AI 压缩 + 自动注入，装完不用管；多个工具通用</td>
+</tr>
+<tr>
+<td>affaan-m/ECC</td>
+<td>251,933</td>
+<td>2026-09-07</td>
+<td>全套工程流程</td>
+<td>记忆只是它几十项功能之一，代价是整套都得装</td>
+</tr>
+<tr>
+<td>mem0ai/mem0</td>
+<td>64,813</td>
+<td>2026-09-04</td>
+<td><strong>给开发者的记忆基础设施</strong></td>
+<td>是给你写程序时调用的库，不是装完即用的插件</td>
+</tr>
+<tr>
+<td>SuperClaude_Framework</td>
+<td>23,871</td>
+<td>2026-08-21</td>
+<td>轻量版全套框架</td>
+<td>同 ECC 思路，体量小很多</td>
+</tr>
+<tr>
+<td>Digital-Process-Tools/claude-remember</td>
+<td>166</td>
+<td>2026-09-07</td>
+<td>同类小项目</td>
+<td>在更新，但<strong>只有 166 星</strong>，且<strong>未声明许可证</strong></td>
+</tr>
+<tr>
+<td>customable/claude-mem</td>
+<td><strong>4</strong></td>
+<td><strong>2026-01-25</strong></td>
+<td>claude-mem 的 fork</td>
+<td><strong>4 个星、8 个月没动、无许可证 —— 不要用</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>最后两行是查接口才看出来的：一个 166 星、一个只有 4 星且已停更。<strong>这也说明这个赛道里真正能用的其实没几个。</strong></p>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>你就是想解决"换会话就忘"，别的都不想动</strong> → <strong>选 claude-mem</strong>。这是最直接的答案，装完即用，而且不绑死 Claude Code。</li>
+<li><strong>你在自己写一个 AI 应用，需要给它加记忆能力</strong> → 选 mem0。<strong>这两个不是竞品</strong>：claude-mem 是给你日常用的插件，mem0 是给你写代码时调用的库。选错方向会很痛苦。</li>
+<li><strong>你想要的不只是记忆，还要规划、审查、安全那一整套</strong> → 去看 ECC 或 SuperClaude。但反过来说：<strong>如果你只缺记忆，装那一整套是杀鸡用牛刀</strong>，而且它们本身也重。</li>
+<li><strong>另外两个（claude-remember、customable 的 fork）我不建议用</strong>：一个太小众，一个基本已死，而且都没声明许可证。</li>
+</ul>
+<p>一句话：<strong>记忆这件事上，claude-mem 目前基本没有对手。</strong> 它的风险不在竞争，在于那个改名——一个叫 Claude-Mem 的项目改叫 Grok Mem，重心往哪走值得盯着。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>它到底记住了什么、忘了什么</strong>（最值得验）。跨一天做同一个功能，第二天开新会话，<strong>故意不交代任何背景</strong>，直接问"我们上次改到哪了"。看它答得多准。这是唯一能验证核心价值的方法，而现有评测全是教你怎么装。</li>
+<li><strong>中文项目上准不准</strong>。它靠 AI 压缩会话内容成摘要，中文代码注释、中文需求描述会不会被压丢？所有评测都是英文场景，<strong>这是块空白</strong>。</li>
+<li><strong>改名之后 Claude Code 这条线还维护不维护</strong>。去 issue 区看看最近的提交都在修什么——是在修 Claude Code 的问题，还是在往 Grok 那边加功能？<strong>这个观察本身就是内容。</strong></li>
+<li><strong>额外花多少钱</strong>。它要调 AI 来压缩会话，那这部分是谁付？用你的 key 吗？一天下来多花多少？<strong>README 没说清楚，值得实测。</strong></li>
+<li><strong>涉密项目能不能用</strong>。工作过程会送去给模型处理，验一下能不能配置成本地模型或者关掉某些目录。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><em>还没有亲自试过这个工具。</em></p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

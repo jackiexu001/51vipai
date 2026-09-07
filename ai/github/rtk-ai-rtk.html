@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>rtk-ai/rtk 评测 | 51VIPAI</title>
+    <meta name="description" content="在你的 AI 编程助手和终端之间架一层&quot;过滤器&quot;，把命令输出压缩之后再喂给 AI" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>rtk-ai/rtk</h1>
+        <p><a href="https://github.com/rtk-ai/rtk">https://github.com/rtk-ai/rtk</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/rtk-ai/rtk">rtk-ai/rtk</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>79,172 star / 5,011 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>Rust</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2026-01-22</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-07</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（0 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>Apache-2.0（宽松许可证，商用一般没问题）</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>1,827 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p>在你的 AI 编程助手和终端之间架一层"过滤器"，<strong>把命令输出压缩之后再喂给 AI</strong>。名字是 Rust Token Killer 的缩写。</p>
+<p>痛点很具体：你让 Claude 跑一句 <code>npm test</code>，它可能吐出几百行，其中 99% 是"通过、通过、通过"。这几百行会<strong>一字不落地进入 AI 的上下文</strong>——既花钱，又把有限的上下文挤满。RTK 拦在中间，把这几百行压成"通过 312 个，失败 2 个"外加那 2 个的详情。</p>
+<p>它认识 100 多个常用命令，会按命令类型分别处理：</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>你敲的命令</th>
+<th>RTK 做的事</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ls</code> / <code>tree</code></td>
+<td>变成树状结构 + 文件计数，不再一行一个文件</td>
+</tr>
+<tr>
+<td><code>cat</code></td>
+<td>只给函数签名和结构，不给完整正文</td>
+</tr>
+<tr>
+<td><code>git status</code></td>
+<td>压成紧凑格式，按状态分组</td>
+</tr>
+<tr>
+<td><code>npm test</code> / <code>cargo test</code></td>
+<td><strong>只留失败的，通过的折叠成一个数字</strong></td>
+</tr>
+<tr>
+<td><code>pytest</code></td>
+<td>只留失败，调用栈裁短</td>
+</tr>
+<tr>
+<td><code>docker ps</code></td>
+<td>只留关键字段</td>
+</tr>
+</tbody>
+</table></div>
+<p>技术上是<strong>一个 Rust 编译出来的可执行文件，零依赖，开销小于 10 毫秒</strong>——装上基本感觉不到。</p>
+<p>装好后跑 <code>rtk init --global</code>，它会在 Claude Code 里装一个钩子，之后你正常敲命令，它自动接管，你不用改任何习惯。</p>
+<p><strong>这个项目最难得的是它的诚实。</strong> README 里专门有一节澄清：</p>
+<blockquote>
+<p>RTK 削掉的是<strong>你的 AI 读到的命令输出</strong>，最高 90%。这<strong>不等于账单降 90%</strong>。命令输出只是输入 token 的一部分，输入 token 又只是账单的一部分（还有输出 token）。<strong>这个折扣在每一层都会被稀释。</strong></p>
+</blockquote>
+<p>绝大多数项目会直接把"省 90%"印在标题上，它却主动把话说清楚。<strong>这种自我克制本身就是个质量信号。</strong></p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>用 AI 编程助手的人都撞过同一堵墙：<strong>上下文不够用，而且花钱。</strong> 你让它跑测试、看 git 状态、翻目录，每一次的原始输出都全额进入上下文。真正有用的可能就三行，剩下几百行是噪音——但你照样为它付钱，而且它挤占了本该留给代码的空间。</p>
+<p><strong>它是怎么做到的</strong></p>
+<p>四种压缩手段：分组（把相似的归拢）、截断（留关键、砍冗余）、去重（重复日志折叠）。有公开的按命令统计：<a href="https://dev.to/arshtechpro/how-rtk-reduces-llm-token-usage-for-ai-coding-agents-2kfd">cargo test 省 91.8%、git status 省 80.8%、find 省 78.3%、grep 省 49.5%</a>。</p>
+<p><strong>为什么是它赢了</strong></p>
+<p>这个思路不新，但它做对了三件工程上的事：<strong>一个二进制文件、零依赖、零配置</strong>。竞品往往要装 Python 环境、写配置文件、改工作流；它装完跑一句 <code>rtk init --global</code> 就接管了，你连命令都照旧敲。Rust 带来的 &lt;10 毫秒开销也让"加一层代理"不再是负担。</p>
+<p><strong>大家在夸什么</strong></p>
+<p>省钱、省上下文、装了不用管。有测评的标题直接叫<a href="https://dev.to/arshtechpro/how-rtk-reduces-llm-token-usage-for-ai-coding-agents-2kfd">「一个 CLI 工具砍掉 80% 的 AI 编程账单」</a>。</p>
+<p><strong>大家在骂什么 / 需要留心的</strong></p>
+<p>我这次检索<strong>没有找到成规模的批评</strong>——这既可能说明它确实没什么槽点，也可能说明关注它的人还不够多、用得还不够深。<strong>别把"没找到差评"当成"没有问题"。</strong></p>
+<p>但有两个结构性风险是可以推理出来的，你实测时该盯：</p>
+<ol>
+<li><strong>压缩必然丢信息。</strong> 它把"通过的测试折叠成一个数字"，那如果 AI 恰好需要看某个通过用例的输出呢？<strong>压缩的收益和信息损失是同一枚硬币。</strong> 这一点没有任何一篇评测量化过。</li>
+<li><strong>"省 90%" 和"账单降 90%"是两回事</strong>——这一点连作者自己都在 README 里主动澄清了（见上一节）。但转述它的文章标题往往只留"省 80%"。</li>
+</ol>
+<p><strong>已有的评测</strong></p>
+<ul>
+<li><a href="https://dev.to/arshtechpro/how-rtk-reduces-llm-token-usage-for-ai-coding-agents-2kfd">RTK: Cut Your AI Coding Bill by 80% With One CLI Tool</a>（英文，有具体数字）</li>
+<li><a href="https://medium.com/@ashwinjosh/rtk-to-reduce-claude-token-consumption-6c90d61c0c2c">RTK to reduce Claude token consumption</a>（英文）</li>
+<li><a href="https://knightli.com/en/2026/05/27/rtk-ai-cli-proxy-token-savings/">RTK AI CLI Proxy Guide</a>（中英）</li>
+<li><a href="https://www.rtk-ai.app/">官网 rtk-ai.app</a></li>
+</ul>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>定位</th>
+<th>关键差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>rtk</strong></td>
+<td>79,165</td>
+<td>2026-09-07</td>
+<td>压缩<strong>命令输出</strong></td>
+<td>拦在终端和 AI 之间，100+ 命令，Rust 单文件零依赖</td>
+</tr>
+<tr>
+<td>headroomlabs-ai/headroom</td>
+<td>69,189</td>
+<td>2026-09-07</td>
+<td>压缩<strong>各种输入</strong></td>
+<td>工具输出、日志、文件、RAG 片段都压；有库、代理、MCP 三种形态</td>
+</tr>
+<tr>
+<td>affaan-m/ECC</td>
+<td>251,933</td>
+<td>2026-09-07</td>
+<td>全套工程流程</td>
+<td>上下文控制只是它几十项功能之一</td>
+</tr>
+<tr>
+<td>thedotmack/claude-mem</td>
+<td>93,369</td>
+<td>2026-09-07</td>
+<td>跨会话记忆</td>
+<td>压缩的是<strong>会话历史</strong>，不是命令输出</td>
+</tr>
+<tr>
+<td>davila7/claude-code-templates</td>
+<td>30,550</td>
+<td>2026-09-07</td>
+<td>配置 + 监控</td>
+<td>帮你<strong>看清</strong>token 花在哪，但不替你压</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>这几个其实在解决不同环节的问题</strong>，容易被混为一谈，我拆开说：</p>
+<ul>
+<li>rtk 管的是<strong>"命令吐出来的东西"</strong></li>
+<li>headroom 管的是<strong>"所有要进模型的东西"</strong>（范围更广）</li>
+<li>claude-mem 管的是<strong>"上次聊了什么"</strong></li>
+<li>claude-code-templates 管的是<strong>"看清楚花在哪"</strong></li>
+</ul>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>你主要痛点是"跑个测试就把上下文塞满了"</strong> → 选 rtk。它在这一件事上做得最专，而且装完不用管。</li>
+<li><strong>你要压的不只是命令输出，还有大段 JSON、日志、检索片段</strong> → 选 headroom。<strong>注意它的宣称比 rtk 保守得多</strong>：编程场景省 20%，JSON 场景省 60–95%。<strong>rtk 说 60–90%、headroom 说 20%，同样是压缩，差距这么大，说明两边的测量口径根本不同</strong>——这一点没有任何评测澄清过。</li>
+<li><strong>你的问题其实是"换会话就忘"</strong> → 那不是压缩能解决的，去看 claude-mem。</li>
+<li><strong>你连"钱花在哪"都还不清楚</strong> → 先用 claude-code-templates 看一周数据，再决定要不要压。<strong>没测量就优化，是最容易白忙的。</strong></li>
+<li><strong>rtk 和 headroom 可以叠加</strong>（一个管命令、一个管其他输入），但叠加之后省了多少，没人测过。</li>
+</ul>
+<p>一句话：<strong>rtk 胜在专注和零摩擦，headroom 胜在覆盖面。</strong> 如果你 80% 的上下文是被 <code>npm test</code> 和 <code>git diff</code> 撑满的，rtk 更对症。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>省下来的钱到底是多少</strong>（最值得验）。作者自己都在 README 里澄清"省 90% 输出 ≠ 省 90% 账单"。<strong>装之前记一周账单，装之后再记一周</strong>——这个真实数字全网没有，你测出来就是独家。</li>
+<li><strong>压缩会不会误伤</strong>。它把通过的测试折叠成一个数字，那 AI 需要看某个通过用例的输出时怎么办？<strong>故意制造一次"需要完整输出"的场景，看它会不会因此答错。</strong> 这是压缩类工具最本质的风险，却没人验过。</li>
+<li><strong>rtk 和 headroom 的口径差</strong>。两个都装，同一段任务各跑一遍，看实际 token 数。这能一次性回答上面那个"20% 还是 90%"的疑问。</li>
+<li><strong>中文项目上好不好使</strong>。它的压缩规则是按命令输出格式写的，中文路径、中文报错会不会让规则失效？没人验过。</li>
+<li><strong>卸载之后会不会留钩子</strong>。它往 Claude Code 里装了 PreToolUse 钩子，卸载干不干净值得确认。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><em>还没有亲自试过这个工具。</em></p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

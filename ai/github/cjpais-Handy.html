@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cjpais/Handy 评测 | 51VIPAI</title>
+    <meta name="description" content="按住一个快捷键说话，松开后文字直接出现在你正在打字的地方" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="index.html">返回 GitHub 项目评测</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 2026.09.07</p>
+        <h1>cjpais/Handy</h1>
+        <p><a href="https://github.com/cjpais/Handy">https://github.com/cjpais/Handy</a></p>
+      </header>
+      <article class="article-body">
+<h2>1. 基本情况</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>情况</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仓库</td>
+<td><a href="https://github.com/cjpais/Handy">cjpais/Handy</a></td>
+</tr>
+<tr>
+<td>多少人在用</td>
+<td>31,124 star / 2,818 fork</td>
+</tr>
+<tr>
+<td>主要语言</td>
+<td>Rust</td>
+</tr>
+<tr>
+<td>诞生时间</td>
+<td>2025-02-13</td>
+</tr>
+<tr>
+<td>最近更新</td>
+<td>2026-09-05</td>
+</tr>
+<tr>
+<td>还活着吗</td>
+<td>✅ 活跃（2 天前还有更新）</td>
+</tr>
+<tr>
+<td>许可证</td>
+<td>MIT（宽松许可证，商用一般没问题）</td>
+</tr>
+<tr>
+<td>未解决的问题</td>
+<td>170 个 issue 未关闭</td>
+</tr>
+</tbody>
+</table></div>
+<h2>2. 主要用来干什么</h2>
+<p><strong>按住一个快捷键说话，松开后文字直接出现在你正在打字的地方。</strong> 全程在你自己的电脑上完成，一个字都不上传。</p>
+<p>它不是"又一个转录工具"，而是一个<strong>语音输入法</strong>——你在写邮件、写代码注释、填表单，随时按住快捷键说两句，文字就落进去了。用完即走，没有界面挡在中间。</p>
+<p>工作流程简单到几乎没有：</p>
+<ol>
+<li>按住快捷键（也可以设成按一下开始、再按一下结束）</li>
+<li>说话</li>
+<li>松开，它自动转写</li>
+<li>文字粘贴进你当前所在的任何输入框</li>
+</ol>
+<p>技术上：先用一个叫 Silero 的模块把静音段掐掉，再交给识别模型。模型有两类可选——<strong>Whisper</strong>（有显卡时会用显卡加速）或者 <strong>Parakeet V3</strong>（专门为 CPU 优化，能自动判断你说的是什么语言）。Windows、macOS、Linux 都能装，macOS 可以直接 <code>brew install --cask handy</code>。</p>
+<p><strong>它的定位很特别，值得单独说一句。</strong> 作者在 README 里写了一句我认为很坦诚的话：</p>
+<blockquote>
+<p>Handy 不想成为最好的语音转文字应用——<strong>它想成为最容易被 fork 的那一个。</strong></p>
+</blockquote>
+<p>翻译成人话：<strong>它有意保持简单，好让你自己改。</strong> 所以如果你想找一个功能最全的听写软件，它可能不是；但如果你想要一个能读懂、能改、能长期自己维护的底子，它就是冲这个来的。</p>
+<p>一个实际提醒：Homebrew 和 winget 上的安装包<strong>不是官方维护的</strong>（README 里明确说了）。想要最新版，从官网或 GitHub 发布页下载更稳妥。</p>
+<h2>3. 为什么会火</h2>
+<p><strong>它戳中了什么痛点</strong></p>
+<p>语音输入这件事，系统自带的不好用、准确率一般；好用的（Wispr Flow 这类）要订阅、要账号，而且<strong>你说的每一句话都传到别人服务器上</strong>。对于要口述邮件、口述代码注释、口述会议纪要的人来说，这既是钱的问题，也是隐私的问题。</p>
+<p><strong>它是怎么来的</strong>（这个起源故事我觉得值得一说）</p>
+<p>作者 CJ Pais <strong>是因为手指受伤、打字疼，才动手做了这个东西</strong>。这解释了它为什么长这样：不追求功能多，只追求"按住、说、松开"这一件事顺到极致——因为作者自己每天都要用。</p>
+<p><strong>什么时候火的</strong></p>
+<p>2025 年 6 月发到 Hacker News，<a href="https://news.ycombinator.com/item?id=44302416">Show HN 那个帖子拿了 247 分</a>，评价压倒性正面。大家夸的点很集中：<strong>按住说话这个交互足够简单、开源、纯本地</strong>。后来<a href="https://news.ycombinator.com/item?id=46628397">还有第二次讨论</a>。</p>
+<p><strong>为什么是它赢了</strong></p>
+<p>同类里要么是给程序员用的命令行工具（普通人装不起来），要么是收订阅的商业软件。它卡在中间：<strong>桌面软件的易用度 + 开源的自由度 + 零成本。</strong></p>
+<p>而且它把"简单"当成设计目标而不是妥协。作者那句"<strong>不想做最好的，想做最容易被 fork 的</strong>"，是一种很少见的自我克制。</p>
+<p><strong>大家在夸什么</strong></p>
+<ul>
+<li><strong>零遥测</strong>——有评测专门扫过它有没有埋分析 SDK，结果是<strong>一个都没有</strong></li>
+<li><strong>没有付费层、没有订阅、没有字数限制、没有账号</strong>，靠 GitHub 赞助和捐款维持</li>
+<li>模型选择多：跨 13 个家族的 65 个语音模型（Whisper、Parakeet、Moonshine 等）</li>
+</ul>
+<p><strong>大家在骂什么</strong></p>
+<p>有一篇评测的标题直接叫<a href="https://spokenly.app/blog/handy-review">「免费、离线，以及 7 个粗糙的地方」</a>——<strong>说明它确实有毛刺</strong>。这是我这次找到的唯一一篇系统性挑毛病的文章，值得你动手前先读一遍。</p>
+<p>另外要注意：Homebrew 和 winget 上的包<strong>不是官方维护的</strong>，版本可能滞后。</p>
+<p><strong>已有的评测</strong></p>
+<ul>
+<li><a href="https://news.ycombinator.com/item?id=44302416">Show HN 讨论（247 分）</a></li>
+<li><a href="https://spokenly.app/blog/handy-review">Handy 评测：免费、离线，以及 7 个粗糙的地方</a>（<strong>批评视角，最值得读</strong>）</li>
+<li><a href="https://www.getvoibe.com/resources/handy-vs-wispr-flow/">Handy vs Wispr Flow：免费开源 vs 付费</a></li>
+<li><a href="https://www.getvoibe.com/resources/is-handy-safe/">Handy 安全吗</a>（讲隐私和遥测）</li>
+</ul>
+<p>中文的深度评测我这次没有检索到。</p>
+<h2>4. 同类还有谁，怎么选</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>star</th>
+<th>最近更新</th>
+<th>形态</th>
+<th>干什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Handy</strong></td>
+<td>31,124</td>
+<td>2026-09-05</td>
+<td><strong>桌面应用</strong></td>
+<td>按住快捷键说话，文字落进任何输入框</td>
+</tr>
+<tr>
+<td>openai/whisper</td>
+<td>108,658</td>
+<td>2026-08-31</td>
+<td>Python 库</td>
+<td>官方原版模型，是下面几个的地基</td>
+</tr>
+<tr>
+<td>ggml-org/whisper.cpp</td>
+<td>53,489</td>
+<td>2026-09-04</td>
+<td>命令行 / 库</td>
+<td>把 Whisper 变成能在任何设备上跑的 C++ 版</td>
+</tr>
+<tr>
+<td>Zackriya-Solutions/meetily</td>
+<td>30,432</td>
+<td>2026-09-07</td>
+<td>桌面应用</td>
+<td><strong>专做会议</strong>：转录 + 摘要</td>
+</tr>
+<tr>
+<td>m-bain/whisperX</td>
+<td>23,918</td>
+<td>2026-08-30</td>
+<td>Python 库</td>
+<td><strong>能分辨谁在说话</strong> + 词级时间轴</td>
+</tr>
+<tr>
+<td>modelscope/FunASR</td>
+<td>20,210</td>
+<td>2026-09-07</td>
+<td>Python 库</td>
+<td>阿里出品，<strong>中文场景成熟</strong></td>
+</tr>
+<tr>
+<td>debpalash/VoiceStudio</td>
+<td>20,112</td>
+<td>2026-09-07</td>
+<td>桌面应用</td>
+<td>反过来做：文字变语音、克隆声音</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>这些经常被混为一谈，其实解决的是完全不同的问题</strong>，我按"你想干嘛"拆开：</p>
+<ul>
+<li>想<strong>边说边打字</strong>（语音输入法）→ Handy</li>
+<li>想<strong>转录一个已有的音频文件</strong> → whisper.cpp（命令行）</li>
+<li>想<strong>记会议</strong> → meetily</li>
+<li>想<strong>知道谁说了哪句</strong> → whisperX</li>
+<li>做<strong>中文</strong>内容 → FunASR</li>
+<li>想<strong>把文字变成语音</strong> → VoiceStudio（方向相反）</li>
+</ul>
+<h3>什么时候该选它</h3>
+<ul>
+<li><strong>你想要的是"口述代替打字"这个日常习惯</strong> → <strong>选 Handy</strong>，没有更合适的。它是这批里唯一把"语音输入法"这件事做成开箱即用桌面软件的。</li>
+<li><strong>你要批量处理一堆音频文件</strong> → 用 whisper.cpp，命令行更适合写脚本跑一夜。</li>
+<li><strong>你的场景就是开会</strong> → meetily 更对症，它多做了摘要和会议集成。</li>
+<li><strong>你需要区分说话人</strong> → Handy 不做这个，得上 whisperX。</li>
+<li><strong>你主要说中文</strong> → <strong>这是我建议你实测的重点</strong>：Handy 用的是 Whisper 和 Parakeet，中文效果没人正经测过；而 FunASR 是专门为中文打磨的。<strong>如果 Handy 的中文识别不行，那它对你的价值会打对折。</strong></li>
+</ul>
+<p>一句话：<strong>Handy 赢在"日常习惯"这个定位，而不是识别能力。</strong> 它底下用的还是 Whisper——识别能力和其他几个是同一批模型，差别在交互设计。</p>
+<h3>你亲测时重点看这几点</h3>
+<ol>
+<li><strong>中文口述准不准</strong>（最值得验，也最可能出内容）。所有评测都是英文场景。<strong>用中文说一段带专业术语的话</strong>（比如夹杂英文缩写的技术描述），看它怎么处理中英混说、怎么加标点。<strong>这个结论全网没有。</strong></li>
+<li><strong>那"7 个粗糙的地方"到底是哪 7 个</strong>。有一篇评测专门列了它的毛病，你实际用一周，验证哪些是真问题、哪些无所谓。<strong>这是唯一一篇批评文章，值得当作对照。</strong></li>
+<li><strong>延迟有多长</strong>。按住说完松开，多久文字才出来？这个数字决定它能不能真的替代打字，但没人给过。</li>
+<li><strong>和系统自带的听写比，到底强在哪</strong>。macOS 自带听写是免费的，<strong>你得回答"为什么要多装一个"</strong>——这是观众一定会问的问题。</li>
+<li><strong>换模型的差别有多大</strong>。它支持 13 个家族 65 个模型，Whisper Turbo 和 Parakeet V3 在你机器上分别多快、多准？选哪个是最实际的问题。</li>
+</ol>
+<h2>5. 我的实测</h2>
+<p><em>还没有亲自试过这个工具。</em></p>
+<hr />
+<p><small>客观数据来自 GitHub 接口，生成于 2026-09-07。判断部分仅供参考，动手前请以你自己的实测为准。</small></p>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>

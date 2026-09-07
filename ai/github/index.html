@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub 项目评测 | 51VIPAI</title>
+    <meta name="description" content="按用途整理的开源工具评测：能干什么、为什么火、同类怎么选。" />
+    <link rel="stylesheet" href="../../styles.css" />
+    <link rel="stylesheet" href="../../etf/styles.css" />
+    <style>
+/* 只作用于本页的工具列表，不碰站点其他样式 */
+.tool-index { list-style: none; margin: 2rem 0 0; padding: 0; }
+
+.tool-item {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0 1rem;
+  padding: .95rem 1rem .95rem .4rem;
+  border-top: 1px solid var(--rule-2, #ded5c2);
+  border-left: 2px solid transparent;
+  transition: border-left-color .18s ease, background .18s ease, transform .18s ease;
+}
+.tool-item:last-child { border-bottom: 1px solid var(--rule-2, #ded5c2); }
+.tool-item:hover,
+.tool-item:focus-within {
+  border-left-color: var(--rust, #b0431c);
+  background: var(--card, #fbf8f1);
+  transform: translateX(3px);
+}
+
+/* 名次：这份清单本来就按热度排序，所以序号是真实排名，不是装饰 */
+.tool-rank {
+  font: 400 2.35rem/1 var(--disp, "DIN Alternate", sans-serif);
+  color: var(--ink-3, #8a8171);
+  opacity: .55;
+  text-align: right;
+  padding-top: .05rem;
+  font-variant-numeric: tabular-nums;
+  transition: color .2s ease, transform .2s ease;
+}
+.tool-item:hover .tool-rank,
+.tool-item:focus-within .tool-rank {
+  color: var(--rust, #b0431c);
+  opacity: 1;
+  transform: translateX(-2px);
+}
+
+.tool-main { min-width: 0; }
+
+.tool-name {
+  display: inline-block;
+  font: 400 1.12rem/1.3 var(--disp, "DIN Alternate", sans-serif);
+  letter-spacing: .01em;
+  color: var(--ink, #211e19);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.tool-name:hover, .tool-name:focus-visible {
+  color: var(--rust, #b0431c);
+  border-bottom-color: currentColor;
+}
+
+/* 热度条：长度就是相对 star 数。数字紧跟在条尾，让它读起来是"量"不是"线" */
+.tool-heat { display: flex; align-items: center; gap: .6rem; margin: .5rem 0 .4rem; }
+.tool-bar {
+  flex: 0 1 20rem;
+  height: 6px;
+  background: var(--rule-2, #ded5c2);
+  overflow: hidden;
+}
+.tool-bar i {
+  display: block;
+  height: 100%;
+  width: var(--w);
+  background: linear-gradient(90deg, var(--rust, #b0431c), var(--rust-2, #e9a15f));
+  transform-origin: left;
+  animation: tool-bar-draw .8s cubic-bezier(.2,.85,.3,1) both;
+  animation-delay: calc(var(--i) * 60ms + 160ms);
+  transition: filter .2s ease;
+}
+.tool-item:hover .tool-bar i { filter: saturate(1.35); }
+@keyframes tool-bar-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.tool-stars {
+  font: 600 .92rem/1 var(--disp, "DIN Alternate", sans-serif);
+  color: var(--ink, #211e19);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tool-stars small { font-weight: 400; color: var(--ink-3, #8a8171); margin-left: .2rem; }
+
+/* GitHub 的语言色点 —— 借用它自己的视觉惯例，不自造图标 */
+.lang-dot {
+  display: inline-block;
+  width: .68rem; height: .68rem;
+  border-radius: 50%;
+  background: var(--c);
+  margin-right: .5rem;
+  vertical-align: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent);
+  transition: box-shadow .2s ease;
+}
+.tool-item:hover .lang-dot {
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 22%, transparent);
+}
+
+.tool-facts {
+  display: block;
+  font: 400 .82rem/1.5 var(--disp, "DIN Alternate", sans-serif);
+  color: var(--ink-3, #8a8171);
+  font-variant-numeric: tabular-nums;
+}
+.tool-facts b { color: var(--ink-2, #4a443a); font-weight: 600; }
+.tool-facts .sep { margin: 0 .55rem; opacity: .45; }
+.s-live { color: var(--moss, #4a6141); font-style: normal; }
+.s-slow { color: var(--gold, #b58a2b); font-style: normal; }
+.s-dead { color: var(--rust, #b0431c); font-style: normal; }
+
+.tool-sum {
+  margin: .4rem 0 0;
+  font: 400 .92rem/1.6 var(--body, Georgia, serif);
+  color: var(--ink-2, #4a443a);
+}
+
+/* 亲测徽章：只有我真试过的才有，所以它天然稀缺、天然醒目 */
+.tool-flag { padding-top: .3rem; }
+.chip {
+  display: inline-block;
+  padding: .18rem .5rem;
+  border: 1px solid var(--gold, #b58a2b);
+  color: var(--gold, #b58a2b);
+  font: 600 .72rem/1.4 var(--cjk, sans-serif);
+  white-space: nowrap;
+}
+
+/* 载入时逐条浮现 */
+.tool-item {
+  animation: tool-row-in .5s ease both;
+  animation-delay: calc(var(--i) * 55ms);
+}
+@keyframes tool-row-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 620px) {
+  .tool-item { grid-template-columns: 2.4rem minmax(0, 1fr); padding-right: 0; }
+  .tool-rank { font-size: 1.7rem; }
+  .tool-heat { flex-wrap: wrap; gap: .35rem .6rem; }
+  .tool-bar { flex: 1 1 100%; }
+  .tool-flag { grid-column: 2; padding-top: .55rem; }
+  .tool-bar { max-width: none; }
+}
+
+/* 关掉动效时一切静止，热度条直接是完整长度 */
+@media (prefers-reduced-motion: reduce) {
+  .tool-item, .tool-bar i { animation: none; }
+  .tool-item:hover { transform: none; }
+}
+</style>
+  </head>
+  <body class="article-page">
+    <header class="etf-header unified-header">
+      <nav class="etf-nav" aria-label="主导航">
+        <a class="etf-brand" href="../../index.html"><span>51VIPAI</span><small>GITHUB REVIEW</small></a>
+        <div class="etf-nav-links">
+          <a href="../../index.html">首页</a>
+          <a href="../../categories/us-stocks.html">美股</a>
+          <a class="active" href="../../categories/ai.html">AI</a>
+          <a href="../../etf/index.html">ETF</a>
+        </div>
+        <button class="theme-button" id="theme-button" type="button" aria-label="切换深色模式">◐</button>
+      </nav>
+    </header>
+    <main class="article-layout">
+      <a class="back-link" href="../../categories/ai.html">返回 AI 栏目</a>
+      <header class="article-header">
+        <p class="eyebrow">AI · GitHub 项目评测 · 共 11 个</p>
+        <h1>GitHub 项目评测</h1>
+        <p>每个工具一份评测：能干什么、为什么会火、同类还有谁、什么时候该选它。<br /><small>下面按 star 数从高到低排，横条长度就是相对热度。</small></p>
+      </header>
+      <article class="article-body">
+<ol class="tool-index">
+  <li class="tool-item" style="--i:0"><span class="tool-rank">01</span><div class="tool-main"><a class="tool-name" href="affaan-m-ECC.html"><span class="lang-dot" style="--c:#f1e05a"></span>affaan-m/ECC</a><span class="tool-heat"><span class="tool-bar"><i style="--w:100.0%"></i></span><span class="tool-stars">251,991<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>JavaScript</span><p class="tool-sum">给你已经在用的 AI 编程助手（Claude Code、Codex、Cursor 这些）装一套完整的工程流程，让它不再是&quot;你说一句它写一段&quot;，而是按规矩干活</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:1"><span class="tool-rank">02</span><div class="tool-main"><a class="tool-name" href="thedotmack-claude-mem.html"><span class="lang-dot" style="--c:#f1e05a"></span>thedotmack/claude-mem</a><span class="tool-heat"><span class="tool-bar"><i style="--w:37.1%"></i></span><span class="tool-stars">93,370<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>JavaScript</span><p class="tool-sum">解决一件让所有人恼火的事：换个会话，AI 就把前面的全忘了</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:2"><span class="tool-rank">03</span><div class="tool-main"><a class="tool-name" href="rtk-ai-rtk.html"><span class="lang-dot" style="--c:#dea584"></span>rtk-ai/rtk</a><span class="tool-heat"><span class="tool-bar"><i style="--w:31.4%"></i></span><span class="tool-stars">79,172<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>Rust</span><p class="tool-sum">在你的 AI 编程助手和终端之间架一层&quot;过滤器&quot;，把命令输出压缩之后再喂给 AI</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:3"><span class="tool-rank">04</span><div class="tool-main"><a class="tool-name" href="D4Vinci-Scrapling.html"><span class="lang-dot" style="--c:#3572A5"></span>D4Vinci/Scrapling</a><span class="tool-heat"><span class="tool-bar"><i style="--w:31.3%"></i></span><span class="tool-stars">78,898<small>star</small></span></span><span class="tool-facts"><em class="s-live">2 天前更新</em><span class="sep">·</span>Python</span><p class="tool-sum">一个 Python 爬虫框架，最大的特点是网站改版之后你的代码还能继续跑</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:4"><span class="tool-rank">05</span><div class="tool-main"><a class="tool-name" href="headroomlabs-ai-headroom.html"><span class="lang-dot" style="--c:#3572A5"></span>headroomlabs-ai/headroom</a><span class="tool-heat"><span class="tool-bar"><i style="--w:27.5%"></i></span><span class="tool-stars">69,193<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>Python</span><p class="tool-sum">把一切要进入 AI 的内容先压缩一遍再送进去——工具输出、日志、检索到的资料片段、文件内容，连对话历史都压</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:5"><span class="tool-rank">06</span><div class="tool-main"><a class="tool-name" href="ggml-org-whisper.cpp.html"><span class="lang-dot" style="--c:#f34b7d"></span>ggml-org/whisper.cpp</a><span class="tool-heat"><span class="tool-bar"><i style="--w:21.2%"></i></span><span class="tool-stars">53,488<small>star</small></span></span><span class="tool-facts"><em class="s-live">2 天前更新</em><span class="sep">·</span>C++</span><p class="tool-sum">把语音变成文字，而且是在你自己的设备上跑——不用联网，不用给任何公司发钱，录音也不离开本机</p></div><span class="tool-flag"><span class="chip">亲测 · 有条件推荐</span></span></li>
+  <li class="tool-item" style="--i:6"><span class="tool-rank">07</span><div class="tool-main"><a class="tool-name" href="cjpais-Handy.html"><span class="lang-dot" style="--c:#dea584"></span>cjpais/Handy</a><span class="tool-heat"><span class="tool-bar"><i style="--w:12.4%"></i></span><span class="tool-stars">31,124<small>star</small></span></span><span class="tool-facts"><em class="s-live">2 天前更新</em><span class="sep">·</span>Rust</span><p class="tool-sum">按住一个快捷键说话，松开后文字直接出现在你正在打字的地方</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:7"><span class="tool-rank">08</span><div class="tool-main"><a class="tool-name" href="Zackriya-Solutions-meetily.html"><span class="lang-dot" style="--c:#dea584"></span>Zackriya-Solutions/meetily</a><span class="tool-heat"><span class="tool-bar"><i style="--w:12.1%"></i></span><span class="tool-stars">30,434<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>Rust</span><p class="tool-sum">开会的时候它在旁边听着，会后给你一份文字记录和摘要——全程在你自己的电脑上跑，不上云</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:8"><span class="tool-rank">09</span><div class="tool-main"><a class="tool-name" href="mozilla-ai-llamafile.html"><span class="lang-dot" style="--c:#f34b7d"></span>mozilla-ai/llamafile</a><span class="tool-heat"><span class="tool-bar"><i style="--w:10.3%"></i></span><span class="tool-stars">25,897<small>star</small></span></span><span class="tool-facts"><em class="s-live">3 天前更新</em><span class="sep">·</span>C++</span><p class="tool-sum">把一个大模型和运行它需要的一切，打包成单独一个文件</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:9"><span class="tool-rank">10</span><div class="tool-main"><a class="tool-name" href="screenpipe-screenpipe.html"><span class="lang-dot" style="--c:#dea584"></span>screenpipe/screenpipe</a><span class="tool-heat"><span class="tool-bar"><i style="--w:8.5%"></i></span><span class="tool-stars">21,457<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>Rust</span><p class="tool-sum">它在你电脑上一直录着屏和声音，把你看过、听过、做过的一切存成一个可以用自然语言搜索的记忆库，还能把这些内容喂给 AI，让它知道你最近在干什么</p></div><span class="tool-flag"></span></li>
+  <li class="tool-item" style="--i:10"><span class="tool-rank">11</span><div class="tool-main"><a class="tool-name" href="debpalash-VoiceStudio.html"><span class="lang-dot" style="--c:#3572A5"></span>debpalash/VoiceStudio</a><span class="tool-heat"><span class="tool-bar"><i style="--w:8.0%"></i></span><span class="tool-stars">20,133<small>star</small></span></span><span class="tool-facts"><em class="s-live">今天还在更新</em><span class="sep">·</span>Python</span><p class="tool-sum">在自己电脑上克隆声音、给视频配音、做有声书——对标 ElevenLabs，但完全本地、不要账号、不要 API key、没有用量限制</p></div><span class="tool-flag"></span></li>
+</ol>
+      </article>
+    </main>
+    <script src="/feedback-widget.js"></script>
+  </body>
+</html>
